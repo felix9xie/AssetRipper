@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>GuidMappingTool</AssemblyName>
+    <RootNamespace>AssetRipper.Tools</RootNamespace>
+    <StartupObject>AssetRipper.Tools.GuidMappingProgram</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AddressableCatalogParser.cs" />
+    <Compile Remove="TestCatalogParser.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
+

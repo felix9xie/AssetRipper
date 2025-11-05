@@ -7,6 +7,7 @@
 		<TrimmerSingleWarn>false</TrimmerSingleWarn>
 		<OutputPath>..\0Bins\AssetRipper.GUI.Free\$(Configuration)\</OutputPath>
 		<IntermediateOutputPath>..\0Bins\obj\AssetRipper.GUI.Free\$(Configuration)\</IntermediateOutputPath>
+		<CETCompat>false</CETCompat>
 	</PropertyGroup>
 
 	<PropertyGroup>

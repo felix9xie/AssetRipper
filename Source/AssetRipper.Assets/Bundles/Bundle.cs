@@ -4,6 +4,7 @@ using AssetRipper.IO.Files;
 using AssetRipper.IO.Files.ResourceFiles;
 using AssetRipper.IO.Files.SerializedFiles;
 using AssetRipper.IO.Files.SerializedFiles.Parser;
+using AssetRipper.Primitives;
 
 namespace AssetRipper.Assets.Bundles;
 
@@ -92,7 +93,71 @@ public abstract class Bundle : IDisposable
 	/// <returns>The resolved <see cref="AssetCollection"/> if it exists, else null.</returns>
 	public AssetCollection? ResolveCollection(FileIdentifier identifier)
 	{
-		return ResolveCollection(identifier.GetFilePath());
+		// First, try to resolve by file path (name-based resolution)
+		AssetCollection? result = ResolveCollection(identifier.GetFilePath());
+		if (result is not null)
+		{
+			return result;
+		}
+
+		// If name-based resolution fails and the identifier has a GUID (AssetType.Meta),
+		// try to resolve by GUID. This is particularly important for APK files where
+		// dependencies are referenced by GUID instead of file name.
+		if (identifier.Type == AssetType.Meta && !identifier.Guid.IsZero)
+		{
+			return ResolveCollectionByGuid(identifier.Guid);
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Resolves an <see cref="AssetCollection"/> by its GUID in this Bundle and its ascendants.
+	/// </summary>
+	/// <param name="guid">The GUID of the <see cref="AssetCollection"/>.</param>
+	/// <returns>The resolved <see cref="AssetCollection"/> if it exists, else null.</returns>
+	private AssetCollection? ResolveCollectionByGuid(UnityGuid guid)
+	{
+		Bundle? bundleToExclude = null;
+		Bundle? currentBundle = this;
+		while (currentBundle is not null)
+		{
+			AssetCollection? result = TryResolveFromCollectionsByGuid(currentBundle, guid) 
+				?? TryResolveFromChildBundlesByGuid(currentBundle, guid, bundleToExclude);
+			if (result is not null)
+			{
+				return result;
+			}
+
+			bundleToExclude = currentBundle;
+			currentBundle = currentBundle.Parent;
+		}
+
+		return null;
+
+		static AssetCollection? TryResolveFromCollectionsByGuid(Bundle currentBundle, UnityGuid guid)
+		{
+			foreach (AssetCollection collection in currentBundle.Collections)
+			{
+				if (!collection.Guid.IsZero && collection.Guid == guid)
+				{
+					return collection;
+				}
+			}
+			return null;
+		}
+
+		static AssetCollection? TryResolveFromChildBundlesByGuid(Bundle currentBundle, UnityGuid guid, Bundle? bundleToExclude)
+		{
+			foreach (Bundle bundle in currentBundle.Bundles)
+			{
+				if (bundle != bundleToExclude && TryResolveFromCollectionsByGuid(bundle, guid) is { } collection)
+				{
+					return collection;
+				}
+			}
+			return null;
+		}
 	}
 
 	/// <summary>

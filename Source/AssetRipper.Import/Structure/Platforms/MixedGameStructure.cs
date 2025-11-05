@@ -33,12 +33,25 @@ public sealed class MixedGameStructure : PlatformGameStructure
 		DataPaths = dataPaths.ToArray();
 		Name = Files.Count == 0 ? string.Empty : Files.First().Key;
 		GameDataPath = null;
-		ManagedPath = null;
 		UnityPlayerPath = null;
 		Version = null;
-		Il2CppGameAssemblyPath = null;
-		Il2CppMetaDataPath = null;
-		Backend = Assemblies.Count > 0 ? ScriptingBackend.Mono : ScriptingBackend.Unknown;
+
+		// Attempt to detect IL2Cpp files in the collected paths
+		DetectIl2CppFiles(paths);
+
+		// Determine scripting backend
+		if (HasIl2CppFiles())
+		{
+			Backend = ScriptingBackend.IL2Cpp;
+		}
+		else if (Assemblies.Count > 0)
+		{
+			Backend = ScriptingBackend.Mono;
+		}
+		else
+		{
+			Backend = ScriptingBackend.Unknown;
+		}
 	}
 
 	private static IEnumerable<string> SelectUniquePaths(IEnumerable<string> paths)
@@ -108,6 +121,74 @@ public sealed class MixedGameStructure : PlatformGameStructure
 				{
 					assemblies.Add(name, file);
 				}
+			}
+		}
+	}
+
+	private void DetectIl2CppFiles(IEnumerable<string> paths)
+	{
+		// Search for IL2Cpp files in all provided paths
+		foreach (string path in paths)
+		{
+			if (!FileSystem.Directory.Exists(path))
+			{
+				continue;
+			}
+
+			// Search for libil2cpp.so recursively
+			if (Il2CppGameAssemblyPath == null)
+			{
+				try
+				{
+					// Search in lib directories first
+					string libPath = FileSystem.Path.Join(path, "lib");
+					if (FileSystem.Directory.Exists(libPath))
+					{
+						Il2CppGameAssemblyPath = FileSystem.Directory.EnumerateFiles(libPath, "libil2cpp.so", SearchOption.AllDirectories).FirstOrDefault();
+					}
+
+					// If not found in lib, search the entire path
+					if (Il2CppGameAssemblyPath == null)
+					{
+						Il2CppGameAssemblyPath = FileSystem.Directory.EnumerateFiles(path, "libil2cpp.so", SearchOption.AllDirectories).FirstOrDefault();
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Log(LogType.Warning, LogCategory.Import, $"Error searching for libil2cpp.so in '{path}': {ex.Message}");
+				}
+			}
+
+			// Search for global-metadata.dat recursively
+			if (Il2CppMetaDataPath == null)
+			{
+				try
+				{
+					Il2CppMetaDataPath = FileSystem.Directory.EnumerateFiles(path, "global-metadata.dat", SearchOption.AllDirectories).FirstOrDefault();
+					
+					// If found, also set ManagedPath to its parent directory
+					if (Il2CppMetaDataPath != null)
+					{
+						string? metadataDir = FileSystem.Path.GetDirectoryName(Il2CppMetaDataPath);
+						if (metadataDir != null)
+						{
+							ManagedPath = FileSystem.Path.GetDirectoryName(metadataDir); // Go up one more level from Metadata folder
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Log(LogType.Warning, LogCategory.Import, $"Error searching for global-metadata.dat in '{path}': {ex.Message}");
+				}
+			}
+
+			// If both files are found, we can stop searching
+			if (Il2CppGameAssemblyPath != null && Il2CppMetaDataPath != null)
+			{
+				Logger.Info(LogCategory.Import, $"IL2Cpp files detected:");
+				Logger.Info(LogCategory.Import, $"  libil2cpp.so: {Il2CppGameAssemblyPath}");
+				Logger.Info(LogCategory.Import, $"  global-metadata.dat: {Il2CppMetaDataPath}");
+				break;
 			}
 		}
 	}

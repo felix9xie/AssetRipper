@@ -3,6 +3,7 @@ using AssetRipper.Assets.Metadata;
 using AssetRipper.IO.Endian;
 using AssetRipper.IO.Files;
 using AssetRipper.IO.Files.SerializedFiles;
+using AssetRipper.Primitives;
 using System.Collections;
 
 namespace AssetRipper.Assets.Collections;
@@ -22,6 +23,13 @@ public abstract class AssetCollection : IReadOnlyCollection<IUnityObjectBase>
 	public Bundle Bundle { get; }
 	public string Name { get; protected set; } = string.Empty;
 	public string FilePath { get; set; } = string.Empty;
+	/// <summary>
+	/// The GUID of this collection, used for resolving dependencies in AssetBundles and APK files.
+	/// </summary>
+	/// <remarks>
+	/// This is particularly important for APK files where dependencies are referenced by GUID instead of file name.
+	/// </remarks>
+	public UnityGuid Guid { get; protected set; }
 	/// <summary>
 	/// The list of dependencies for this collection.
 	/// </summary>

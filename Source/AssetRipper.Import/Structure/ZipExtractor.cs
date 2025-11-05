@@ -63,31 +63,98 @@ internal static class ZipExtractor
 	{
 		if (!HasCompatibleMagic(xapkFilePath, fileSystem))
 		{
+			Logger.Info(LogCategory.Import, $"XAPK file '{xapkFilePath}' does not have compatible magic number.");
 			return xapkFilePath;
 		}
 
 		string intermediateDirectory = fileSystem.Directory.CreateTemporary();
 		string outputDirectory = fileSystem.Directory.CreateTemporary();
 		DecompressZipArchive(xapkFilePath, intermediateDirectory, fileSystem);
-		foreach (string filePath in fileSystem.Directory.GetFiles(intermediateDirectory))
+		
+		// List all files in intermediate directory for debugging
+		string[] intermediateFiles = fileSystem.Directory.GetFiles(intermediateDirectory);
+		Logger.Info(LogCategory.Import, $"Found {intermediateFiles.Length} files in XAPK:");
+		foreach (string file in intermediateFiles)
+		{
+			string fileName = fileSystem.Path.GetFileName(file);
+			string ext = GetFileExtension(file, fileSystem);
+			Logger.Info(LogCategory.Import, $"  - {fileName} (extension: {ext})");
+		}
+		
+		int apkCount = 0;
+		foreach (string filePath in intermediateFiles)
 		{
 			if (GetFileExtension(filePath, fileSystem) == ApkExtension)
 			{
+				apkCount++;
 				DecompressZipArchive(filePath, outputDirectory, fileSystem);
 			}
 		}
+		
+		Logger.Info(LogCategory.Import, $"Extracted {apkCount} APK file(s) from XAPK to '{outputDirectory}'");
 		return outputDirectory;
 	}
 
 	private static void DecompressZipArchive(string zipFilePath, string outputDirectory, FileSystem fileSystem)
 	{
 		Logger.Info(LogCategory.Import, $"Decompressing files...{Environment.NewLine}\tFrom: {zipFilePath}{Environment.NewLine}\tTo: {outputDirectory}");
-		using Stream stream = fileSystem.File.OpenRead(zipFilePath);
-		using ZipArchive archive = ZipArchive.Open(stream);
-		using IReader reader = archive.ExtractAllEntries();
-		while (reader.MoveToNextEntry())
+		
+		// Use SharpCompress directly with file path instead of stream to avoid potential issues
+		using (ZipArchive archive = ZipArchive.Open(zipFilePath))
 		{
-			WriteEntryToDirectory(reader, outputDirectory, fileSystem);
+			int entryCount = archive.Entries.Count();
+			int successCount = 0;
+			
+			Logger.Info(LogCategory.Import, $"Archive contains {entryCount} entries");
+			
+			foreach (ZipArchiveEntry entry in archive.Entries)
+			{
+				try
+				{
+					string entryKey = entry.Key ?? "";
+					if (entry.IsDirectory)
+					{
+						// Create directory
+						string directoryPath = fileSystem.Path.Join(outputDirectory, entryKey);
+						if (!fileSystem.Directory.Exists(directoryPath))
+						{
+							fileSystem.Directory.Create(directoryPath);
+						}
+					}
+					else
+					{
+						// Extract file
+						string? directory = fileSystem.Path.GetDirectoryName(entryKey);
+						if (string.IsNullOrEmpty(directory))
+						{
+							directory = string.Empty;
+						}
+						
+						string fullDirectory = fileSystem.Path.Join(outputDirectory, directory);
+						if (!fileSystem.Directory.Exists(fullDirectory))
+						{
+							fileSystem.Directory.Create(fullDirectory);
+						}
+						
+						string fileName = fileSystem.Path.GetFileName(entryKey) ?? "";
+						fileName = FileSystem.FixInvalidFileNameCharacters(fileName);
+						string filePath = fileSystem.Path.Join(fullDirectory, fileName);
+						
+						using (Stream entryStream = entry.OpenEntryStream())
+						using (Stream outputStream = fileSystem.File.Create(filePath))
+						{
+							entryStream.CopyTo(outputStream);
+						}
+					}
+					successCount++;
+				}
+				catch (Exception ex)
+				{
+					Logger.Log(LogType.Error, LogCategory.Import, $"Failed to extract entry '{entry.Key}': {ex.Message}");
+				}
+			}
+			
+			Logger.Info(LogCategory.Import, $"Extracted {successCount}/{entryCount} entries to '{outputDirectory}'");
 		}
 	}
 
@@ -105,7 +172,12 @@ internal static class ZipExtractor
 		string fileName = fileSystem.Path.GetFileName(entry.Key ?? throw new NullReferenceException("Entry Key is null")) ?? throw new NullReferenceException("File is null");
 		fileName = FileSystem.FixInvalidFileNameCharacters(fileName);
 
-		string directory = fileSystem.Path.GetDirectoryName(entry.Key ?? throw new NullReferenceException("Entry Key is null")) ?? throw new NullReferenceException("Directory is null");
+		string? directory = fileSystem.Path.GetDirectoryName(entry.Key ?? throw new NullReferenceException("Entry Key is null"));
+		// Handle root directory files (directory can be null or empty string)
+		if (string.IsNullOrEmpty(directory))
+		{
+			directory = string.Empty;
+		}
 		string fullDirectory = fileSystem.Path.GetFullPath(fileSystem.Path.Join(fullOutputDirectory, directory));
 
 		if (!fileSystem.Directory.Exists(fullDirectory))

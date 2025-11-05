@@ -1,0 +1,577 @@
+╔════════════════════════════════════════════════════════════╗
+║     Addressable GUID 映射转换工具 v1.0                    ║
+╚════════════════════════════════════════════════════════════╝
+
+=== 步骤 1: 解析 Addressable Catalog ===
+Catalog: D:\Work\Tools\AssetRipper-master\AssetRipper\Source\0Bins\AssetRipper.GUI.Free\Release\temp\d212\f050f870\assets\aa\catalog.json
+
+Bucket 数量: 22552
+正在解析 GUID 映射...
+? 解析完成！找到 9701 个 GUID 映射
+
+=== 步骤 2: 扫描导出的 Unity 项目 ===
+项目路径: D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251105_035302\ExportedProject
+
+找到 54678 个 .meta 文件
+正在提取 GUID...
+? 扫描完成！处理了 54023 个资源
+
+=== 步骤 3: 建立 GUID 映射关系 ===
+总共需要处理 9701 个 GUID...
+
+? 未找到匹配: 5a5c5fbc07ae03c489f46213781c563a → _Main/Scenes/Scene-Splash
+  原始 InternalId: _Main/Scenes/Scene-Splash
+  进度: 5% (486/9701) - 已匹配: 485, 未匹配: 1
+  进度: 10% (971/9701) - 已匹配: 970, 未匹配: 1
+  进度: 15% (1456/9701) - 已匹配: 1455, 未匹配: 1
+  进度: 20% (1941/9701) - 已匹配: 1940, 未匹配: 1
+  进度: 25% (2426/9701) - 已匹配: 2425, 未匹配: 1
+  进度: 30% (2911/9701) - 已匹配: 2910, 未匹配: 1
+  进度: 35% (3396/9701) - 已匹配: 3395, 未匹配: 1
+  进度: 40% (3881/9701) - 已匹配: 3880, 未匹配: 1
+  进度: 45% (4366/9701) - 已匹配: 4365, 未匹配: 1
+  进度: 50% (4851/9701) - 已匹配: 4850, 未匹配: 1
+  进度: 55% (5336/9701) - 已匹配: 5335, 未匹配: 1
+? 未找到匹配: be4d3c647904e3647ac3387397dd2ec5 → Assets/_Main/Sounds/CC_Opt_SOUNDS_06?12/CC_Start_Button.ogg
+  原始 InternalId: Assets/_Main/Sounds/CC_Opt_SOUNDS_06?12/CC_Start_Button.ogg
+? 未找到匹配: 2f6c8c2d429674940bd53a23e7abdf70 → Assets/_Main/Sounds/CC_Opt_SOUNDS_06?12/CC_STOCK_Music_LOOP.ogg
+  原始 InternalId: Assets/_Main/Sounds/CC_Opt_SOUNDS_06?12/CC_STOCK_Music_LOOP.ogg
+? 未找到匹配: 225b6f9bc6ca23c4a90536099f39e711 → Assets/_Main/Sounds/CC_Opt_SOUNDS_06?12/CC_UI_SubMenu.ogg
+  原始 InternalId: Assets/_Main/Sounds/CC_Opt_SOUNDS_06?12/CC_UI_SubMenu.ogg
+? 未找到匹配: a5ae8dc4d83552e4ea682e9f470ad3fd → Assets/_Main/VFX/VFX_images/flower_bush_grass.png
+  原始 InternalId: Assets/_Main/VFX/VFX_images/flower_bush_grass.png
+  进度: 60% (5821/9701) - 已匹配: 5816, 未匹配: 5
+? 未找到匹配: 8d1bd61b1dc763c4985287fce4b410ba → BillingMode
+  原始 InternalId: BillingMode
+? 未找到匹配: 98100116c2c470246bba230cca7e4e57 → Blend
+  原始 InternalId: Blend
+? 未找到匹配: a79d09c457f02b64f98237d8d722d664 → Blend-Composite
+  原始 InternalId: Blend-Composite
+? 未找到匹配: 1cbed42ec49f9154f9a3ffb6aff40acc → Blend-Dissolve
+  原始 InternalId: Blend-Dissolve
+? 未找到匹配: f3a6a79d3354eed47ac0c1f84c948689 → Blend-Doom
+  原始 InternalId: Blend-Doom
+  进度: 65% (6306/9701) - 已匹配: 6065, 未匹配: 241
+  进度: 70% (6791/9701) - 已匹配: 6065, 未匹配: 726
+  进度: 75% (7276/9701) - 已匹配: 6065, 未匹配: 1211
+  进度: 80% (7761/9701) - 已匹配: 6065, 未匹配: 1696
+  进度: 85% (8246/9701) - 已匹配: 6065, 未匹配: 2181
+  进度: 90% (8731/9701) - 已匹配: 6065, 未匹配: 2666
+  进度: 95% (9216/9701) - 已匹配: 6065, 未匹配: 3151
+  进度: 100% (9701/9701) - 已匹配: 6065, 未匹配: 3636
+
+? 映射完成！
+  - 成功匹配: 6065 个
+  - 未匹配: 3636 个
+
+=== 步骤 4: 转换关卡配置 GUID ===
+输入目录: D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251105_035302\ExportedProject\Assets\Resources\leveldata
+输出目录: D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251105_035302\ExportedProject\Assets\Resources\leveldata_converted
+
+找到 3624 个 .asset 文件
+
+  Aarhus_Empty.asset: 无需转换
+  Alexandria_Empty.asset: 无需转换
+  AnnesBurg_Empty.asset: 无需转换
+  Antarctica_Empty.asset: 无需转换
+  AnubisLair_Empty.asset: 无需转换
+  AsteroidX57_Empty.asset: 无需转换
+  Atlantis_Dummy.asset: 无需转换
+  BikiniBottom_Empty.asset: 无需转换
+  Blackwater_Empty.asset: 无需转换
+  Brighton_Empty.asset: 无需转换
+  CakeCity_Empty.asset: 无需转换
+  Cambridge_Empty.asset: 无需转换
+  CandyCity_Empty.asset: 无需转换
+  Carnival_Empty.asset: 无需转换
+  ChocolateCity_Empty.asset: 无需转换
+  Crims_Empty.asset: 无需转换
+? Dummy_Level.asset: 替换了 11 个 GUID
+? Festival_Empty.asset: 替换了 2 个 GUID
+  GreenValley4_Empty.asset: 无需转换
+  GreenValleyV2_Empty.asset: 无需转换
+  GreenValleyV3_Empty.asset: 无需转换
+? GreenValley_Empty.asset: 替换了 1 个 GUID
+  Gronland_Empty.asset: 无需转换
+  Island_Empty.asset: 无需转换
+  Istanbul_Empty.asset: 无需转换
+  Kanagawa_Empty.asset: 无需转换
+  Kyoto_Empty.asset: 无需转换
+  Lemuria_Empty.asset: 无需转换
+  Lincoln_Empty.asset: 无需转换
+  London_Empty.asset: 无需转换
+? loop_NO_Island_6.asset: 替换了 118 个 GUID
+? loop_NO_Island_8.asset: 替换了 162 个 GUID
+? loop_NO_MonkeyIsland_1.asset: 替换了 221 个 GUID
+? loop_NO_MonkeyIsland_2.asset: 替换了 138 个 GUID
+? loop_NO_MountainV2_1.asset: 替换了 172 个 GUID
+? loop_NO_MountainV2_2.asset: 替换了 162 个 GUID
+? loop_NO_MountainV3_1.asset: 替换了 176 个 GUID
+? loop_NO_VestaIsland_7.asset: 替换了 254 个 GUID
+  Lunapark_Empty.asset: 无需转换
+  Marmoreal_Empty.asset: 无需转换
+? MG_Aquarium.asset: 替换了 54 个 GUID
+? MG_Arcade.asset: 替换了 42 个 GUID
+? MG_Atlantis.asset: 替换了 33 个 GUID
+? MG_Bazaar.asset: 替换了 30 个 GUID
+? MG_Beach.asset: 替换了 36 个 GUID
+? MG_Bear.asset: 替换了 24 个 GUID
+? MG_BicylePath.asset: 替换了 18 个 GUID
+? MG_Birds.asset: 替换了 12 个 GUID
+? MG_Book.asset: 替换了 30 个 GUID
+? MG_BottleShop.asset: 替换了 36 个 GUID
+? MG_Candy.asset: 替换了 36 个 GUID
+? MG_Castle.asset: 替换了 18 个 GUID
+? MG_CatInTheKitchen.asset: 替换了 24 个 GUID
+  MG_CatWithFlower.asset: 无需转换
+? MG_Cemetery.asset: 替换了 36 个 GUID
+? MG_Chat.asset: 替换了 24 个 GUID
+? MG_Chest.asset: 替换了 15 个 GUID
+? MG_Circle.asset: 替换了 24 个 GUID
+? MG_Crowd.asset: 替换了 24 个 GUID
+? MG_CupcakeFacktory.asset: 替换了 36 个 GUID
+? MG_CupcakeShop.asset: 替换了 30 个 GUID
+? MG_CupcakesMonsters.asset: 替换了 27 个 GUID
+? MG_CupTower.asset: 替换了 30 个 GUID
+? MG_Dark.asset: 替换了 18 个 GUID
+? MG_Dogs.asset: 替换了 27 个 GUID
+? MG_DogWithFlour.asset: 替换了 30 个 GUID
+? MG_Dwarves.asset: 替换了 24 个 GUID
+? MG_Fair.asset: 替换了 15 个 GUID
+? MG_Fairytale.asset: 替换了 36 个 GUID
+? MG_Farm.asset: 替换了 27 个 GUID
+? MG_FarmHouse.asset: 替换了 27 个 GUID
+? MG_Fish.asset: 替换了 27 个 GUID
+? MG_FishingVilage.asset: 替换了 27 个 GUID
+? MG_FlowerShop.asset: 替换了 36 个 GUID
+? MG_Forest.asset: 替换了 21 个 GUID
+? MG_ForestCabins.asset: 替换了 36 个 GUID
+? MG_ForestCottage.asset: 替换了 27 个 GUID
+? MG_ForestPath.asset: 替换了 36 个 GUID
+? MG_ForestPicnic.asset: 替换了 36 个 GUID
+? MG_ForestTrain.asset: 替换了 36 个 GUID
+? MG_FountainGarden.asset: 替换了 36 个 GUID
+? MG_GrandVillage.asset: 替换了 33 个 GUID
+? MG_GreenHouse.asset: 替换了 18 个 GUID
+? MG_GreenhouseGarden.asset: 替换了 27 个 GUID
+? MG_Halloween.asset: 替换了 36 个 GUID
+? MG_Handbyhand.asset: 替换了 30 个 GUID
+? MG_House.asset: 替换了 27 个 GUID
+? MG_HouseStoneWay.asset: 替换了 18 个 GUID
+? MG_HuntedHouse.asset: 替换了 36 个 GUID
+? MG_Hut.asset: 替换了 30 个 GUID
+? MG_ImpForest.asset: 替换了 27 个 GUID
+? MG_Kindergarden.asset: 替换了 36 个 GUID
+? MG_Kitchen.asset: 替换了 18 个 GUID
+? MG_Laboratory.asset: 替换了 27 个 GUID
+? MG_LanternGarden.asset: 替换了 30 个 GUID
+? MG_LibraryTree.asset: 替换了 24 个 GUID
+? MG_LightHouse.asset: 替换了 24 个 GUID
+? MG_Lunapark.asset: 替换了 39 个 GUID
+? MG_LunaparkMarket.asset: 替换了 30 个 GUID
+? MG_MailBox.asset: 替换了 33 个 GUID
+? MG_Mushroom.asset: 替换了 36 个 GUID
+? MG_MushroomHouses.asset: 替换了 30 个 GUID
+? MG_MushroomOld.asset: 替换了 18 个 GUID
+? MG_NaturePainting.asset: 替换了 27 个 GUID
+? MG_OceanDeep.asset: 替换了 33 个 GUID
+? MG_OceanMermaid.asset: 替换了 36 个 GUID
+? MG_Park.asset: 替换了 36 个 GUID
+? MG_Picnic.asset: 替换了 27 个 GUID
+? MG_Pumpkin.asset: 替换了 36 个 GUID
+? MG_PumpkinBazaar.asset: 替换了 36 个 GUID
+? MG_Rabit.asset: 替换了 24 个 GUID
+? MG_Rainbow.asset: 替换了 36 个 GUID
+? MG_River.asset: 替换了 27 个 GUID
+? MG_Santa.asset: 替换了 24 个 GUID
+? MG_Scarecrow.asset: 替换了 27 个 GUID
+? MG_ScavengerBlack.asset: 替换了 15 个 GUID
+? MG_ScavengerHalloween.asset: 替换了 36 个 GUID
+? MG_Seaside.asset: 替换了 27 个 GUID
+? MG_SeaSideCafe.asset: 替换了 24 个 GUID
+? MG_Shapes.asset: 替换了 18 个 GUID
+? MG_Singing.asset: 替换了 36 个 GUID
+? MG_Snow.asset: 替换了 45 个 GUID
+? MG_SnowMap.asset: 替换了 39 个 GUID
+? MG_Space.asset: 替换了 30 个 GUID
+? MG_SpaceObservatory.asset: 替换了 30 个 GUID
+? MG_SpiceShop.asset: 替换了 24 个 GUID
+? MG_SquirreMarket.asset: 替换了 27 个 GUID
+? MG_StoneHouse.asset: 替换了 30 个 GUID
+  MG_StoneHouseCat.asset: 无需转换
+? MG_SubMarine.asset: 替换了 36 个 GUID
+? MG_SwampHut.asset: 替换了 36 个 GUID
+? MG_Swing.asset: 替换了 27 个 GUID
+? MG_SwingTree.asset: 替换了 21 个 GUID
+? MG_ThemePark.asset: 替换了 24 个 GUID
+? MG_TowerTreeHouse.asset: 替换了 39 个 GUID
+? MG_Toys.asset: 替换了 36 个 GUID
+? MG_ToysShop.asset: 替换了 27 个 GUID
+? MG_TrainTower.asset: 替换了 15 个 GUID
+? MG_TrainTower_2.asset: 替换了 18 个 GUID
+? MG_TrainVillage.asset: 替换了 30 个 GUID
+? MG_Tree.asset: 替换了 27 个 GUID
+? MG_TreeHouses.asset: 替换了 30 个 GUID
+? MG_VikingWarrior.asset: 替换了 30 个 GUID
+? MG_Well.asset: 替换了 36 个 GUID
+? MG_WildWestTown.asset: 替换了 24 个 GUID
+? MG_Witch.asset: 替换了 27 个 GUID
+? MG_XmasMarket.asset: 替换了 30 个 GUID
+? MG_Zoo.asset: 替换了 3 个 GUID
+  MonkeyIsland_Empty.asset: 无需转换
+  Moscow_Empty.asset: 无需转换
+  MountainV2_Empty.asset: 无需转换
+  Mountain_Empty.asset: 无需转换
+  Nidaros_Empty.asset: 无需转换
+  Nile_Empty.asset: 无需转换
+  Northpole_Empty.asset: 无需转换
+  NosAstra_Empty.asset: 无需转换
+? NO_Aarhus_1.asset: 替换了 216 个 GUID
+? NO_Aarhus_10.asset: 替换了 194 个 GUID
+? NO_Aarhus_11.asset: 替换了 324 个 GUID
+? NO_Aarhus_12.asset: 替换了 174 个 GUID
+? NO_Aarhus_13.asset: 替换了 267 个 GUID
+? NO_Aarhus_14.asset: 替换了 222 个 GUID
+? NO_Aarhus_15.asset: 替换了 198 个 GUID
+? NO_Aarhus_16.asset: 替换了 229 个 GUID
+? NO_Aarhus_17.asset: 替换了 215 个 GUID
+? NO_Aarhus_18.asset: 替换了 207 个 GUID
+? NO_Aarhus_19.asset: 替换了 267 个 GUID
+? NO_Aarhus_2.asset: 替换了 175 个 GUID
+? NO_Aarhus_20.asset: 替换了 264 个 GUID
+? NO_Aarhus_21.asset: 替换了 217 个 GUID
+? NO_Aarhus_22.asset: 替换了 216 个 GUID
+? NO_Aarhus_23.asset: 替换了 255 个 GUID
+? NO_Aarhus_24.asset: 替换了 191 个 GUID
+? NO_Aarhus_25.asset: 替换了 231 个 GUID
+  NO_Aarhus_26.asset: 无需转换
+  NO_Aarhus_27.asset: 无需转换
+? NO_Aarhus_28.asset: 替换了 177 个 GUID
+  NO_Aarhus_29.asset: 无需转换
+? NO_Aarhus_3.asset: 替换了 214 个 GUID
+  NO_Aarhus_30.asset: 无需转换
+  NO_Aarhus_31.asset: 无需转换
+  NO_Aarhus_32.asset: 无需转换
+  NO_Aarhus_33.asset: 无需转换
+? NO_Aarhus_34.asset: 替换了 174 个 GUID
+? NO_Aarhus_4.asset: 替换了 192 个 GUID
+? NO_Aarhus_5.asset: 替换了 202 个 GUID
+? NO_Aarhus_6.asset: 替换了 216 个 GUID
+? NO_Aarhus_7.asset: 替换了 235 个 GUID
+? NO_Aarhus_8.asset: 替换了 348 个 GUID
+? NO_Aarhus_9.asset: 替换了 219 个 GUID
+? NO_Alexandria_1.asset: 替换了 163 个 GUID
+? NO_Alexandria_10.asset: 替换了 173 个 GUID
+? NO_Alexandria_11.asset: 替换了 192 个 GUID
+? NO_Alexandria_12.asset: 替换了 231 个 GUID
+? NO_Alexandria_13.asset: 替换了 217 个 GUID
+? NO_Alexandria_14.asset: 替换了 90 个 GUID
+? NO_Alexandria_15.asset: 替换了 143 个 GUID
+? NO_Alexandria_16.asset: 替换了 237 个 GUID
+? NO_Alexandria_17.asset: 替换了 185 个 GUID
+? NO_Alexandria_18.asset: 替换了 172 个 GUID
+? NO_Alexandria_19.asset: 替换了 180 个 GUID
+? NO_Alexandria_2.asset: 替换了 214 个 GUID
+? NO_Alexandria_20.asset: 替换了 147 个 GUID
+? NO_Alexandria_21.asset: 替换了 147 个 GUID
+? NO_Alexandria_22.asset: 替换了 220 个 GUID
+? NO_Alexandria_23.asset: 替换了 148 个 GUID
+? NO_Alexandria_24.asset: 替换了 210 个 GUID
+? NO_Alexandria_25.asset: 替换了 186 个 GUID
+? NO_Alexandria_26.asset: 替换了 185 个 GUID
+? NO_Alexandria_27.asset: 替换了 201 个 GUID
+? NO_Alexandria_28.asset: 替换了 174 个 GUID
+? NO_Alexandria_29.asset: 替换了 222 个 GUID
+? NO_Alexandria_3.asset: 替换了 267 个 GUID
+? NO_Alexandria_30.asset: 替换了 221 个 GUID
+? NO_Alexandria_31.asset: 替换了 236 个 GUID
+? NO_Alexandria_32.asset: 替换了 171 个 GUID
+? NO_Alexandria_33.asset: 替换了 185 个 GUID
+? NO_Alexandria_34.asset: 替换了 193 个 GUID
+? NO_Alexandria_35.asset: 替换了 197 个 GUID
+? NO_Alexandria_36.asset: 替换了 221 个 GUID
+? NO_Alexandria_37.asset: 替换了 190 个 GUID
+? NO_Alexandria_38.asset: 替换了 203 个 GUID
+? NO_Alexandria_39.asset: 替换了 191 个 GUID
+? NO_Alexandria_4.asset: 替换了 220 个 GUID
+? NO_Alexandria_40.asset: 替换了 215 个 GUID
+? NO_Alexandria_41.asset: 替换了 205 个 GUID
+? NO_Alexandria_42.asset: 替换了 239 个 GUID
+? NO_Alexandria_43.asset: 替换了 228 个 GUID
+? NO_Alexandria_44.asset: 替换了 200 个 GUID
+? NO_Alexandria_45.asset: 替换了 268 个 GUID
+? NO_Alexandria_46.asset: 替换了 241 个 GUID
+? NO_Alexandria_47.asset: 替换了 204 个 GUID
+? NO_Alexandria_48.asset: 替换了 176 个 GUID
+? NO_Alexandria_49.asset: 替换了 233 个 GUID
+? NO_Alexandria_5.asset: 替换了 178 个 GUID
+? NO_Alexandria_50.asset: 替换了 209 个 GUID
+? NO_Alexandria_51.asset: 替换了 197 个 GUID
+  NO_Alexandria_52.asset: 无需转换
+  NO_Alexandria_53.asset: 无需转换
+? NO_Alexandria_6.asset: 替换了 118 个 GUID
+? NO_Alexandria_7.asset: 替换了 208 个 GUID
+? NO_Alexandria_8.asset: 替换了 195 个 GUID
+? NO_Alexandria_9.asset: 替换了 153 个 GUID
+? NO_AnnesBurg_1.asset: 替换了 149 个 GUID
+? NO_AnnesBurg_10.asset: 替换了 185 个 GUID
+? NO_AnnesBurg_11.asset: 替换了 153 个 GUID
+? NO_AnnesBurg_12.asset: 替换了 173 个 GUID
+? NO_AnnesBurg_13.asset: 替换了 154 个 GUID
+? NO_AnnesBurg_14.asset: 替换了 162 个 GUID
+? NO_AnnesBurg_15.asset: 替换了 273 个 GUID
+? NO_AnnesBurg_16.asset: 替换了 224 个 GUID
+? NO_AnnesBurg_17.asset: 替换了 224 个 GUID
+? NO_AnnesBurg_18.asset: 替换了 160 个 GUID
+? NO_AnnesBurg_19.asset: 替换了 159 个 GUID
+? NO_AnnesBurg_2.asset: 替换了 159 个 GUID
+? NO_AnnesBurg_20.asset: 替换了 172 个 GUID
+? NO_AnnesBurg_21.asset: 替换了 255 个 GUID
+? NO_AnnesBurg_22.asset: 替换了 191 个 GUID
+? NO_AnnesBurg_23.asset: 替换了 165 个 GUID
+? NO_AnnesBurg_24.asset: 替换了 210 个 GUID
+? NO_AnnesBurg_25.asset: 替换了 185 个 GUID
+? NO_AnnesBurg_26.asset: 替换了 201 个 GUID
+? NO_AnnesBurg_27.asset: 替换了 189 个 GUID
+? NO_AnnesBurg_28.asset: 替换了 217 个 GUID
+? NO_AnnesBurg_29.asset: 替换了 226 个 GUID
+? NO_AnnesBurg_3.asset: 替换了 155 个 GUID
+? NO_AnnesBurg_30.asset: 替换了 221 个 GUID
+? NO_AnnesBurg_31.asset: 替换了 196 个 GUID
+? NO_AnnesBurg_32.asset: 替换了 190 个 GUID
+? NO_AnnesBurg_33.asset: 替换了 256 个 GUID
+? NO_AnnesBurg_34.asset: 替换了 231 个 GUID
+? NO_AnnesBurg_35.asset: 替换了 257 个 GUID
+? NO_AnnesBurg_36.asset: 替换了 160 个 GUID
+? NO_AnnesBurg_37.asset: 替换了 203 个 GUID
+? NO_AnnesBurg_38.asset: 替换了 232 个 GUID
+? NO_AnnesBurg_39.asset: 替换了 248 个 GUID
+? NO_AnnesBurg_4.asset: 替换了 147 个 GUID
+? NO_AnnesBurg_40.asset: 替换了 254 个 GUID
+? NO_AnnesBurg_41.asset: 替换了 198 个 GUID
+? NO_AnnesBurg_42.asset: 替换了 193 个 GUID
+? NO_AnnesBurg_43.asset: 替换了 267 个 GUID
+? NO_AnnesBurg_44.asset: 替换了 192 个 GUID
+? NO_AnnesBurg_45.asset: 替换了 249 个 GUID
+? NO_AnnesBurg_46.asset: 替换了 290 个 GUID
+? NO_AnnesBurg_47.asset: 替换了 246 个 GUID
+? NO_AnnesBurg_48.asset: 替换了 207 个 GUID
+? NO_AnnesBurg_49.asset: 替换了 296 个 GUID
+? NO_AnnesBurg_5.asset: 替换了 150 个 GUID
+? NO_AnnesBurg_50.asset: 替换了 207 个 GUID
+? NO_AnnesBurg_51.asset: 替换了 309 个 GUID
+? NO_AnnesBurg_52.asset: 替换了 388 个 GUID
+? NO_AnnesBurg_53.asset: 替换了 274 个 GUID
+? NO_AnnesBurg_54.asset: 替换了 232 个 GUID
+? NO_AnnesBurg_55.asset: 替换了 325 个 GUID
+? NO_AnnesBurg_56.asset: 替换了 245 个 GUID
+? NO_AnnesBurg_57.asset: 替换了 251 个 GUID
+? NO_AnnesBurg_58.asset: 替换了 268 个 GUID
+? NO_AnnesBurg_59.asset: 替换了 238 个 GUID
+? NO_AnnesBurg_6.asset: 替换了 140 个 GUID
+? NO_AnnesBurg_60.asset: 替换了 288 个 GUID
+? NO_AnnesBurg_61.asset: 替换了 248 个 GUID
+? NO_AnnesBurg_62.asset: 替换了 279 个 GUID
+? NO_AnnesBurg_63.asset: 替换了 252 个 GUID
+? NO_AnnesBurg_64.asset: 替换了 298 个 GUID
+? NO_AnnesBurg_65.asset: 替换了 204 个 GUID
+? NO_AnnesBurg_66.asset: 替换了 220 个 GUID
+? NO_AnnesBurg_67.asset: 替换了 204 个 GUID
+? NO_AnnesBurg_68.asset: 替换了 234 个 GUID
+? NO_AnnesBurg_69.asset: 替换了 210 个 GUID
+? NO_AnnesBurg_7.asset: 替换了 252 个 GUID
+? NO_AnnesBurg_70.asset: 替换了 240 个 GUID
+? NO_AnnesBurg_71.asset: 替换了 237 个 GUID
+? NO_AnnesBurg_72.asset: 替换了 249 个 GUID
+? NO_AnnesBurg_73.asset: 替换了 269 个 GUID
+? NO_AnnesBurg_74.asset: 替换了 252 个 GUID
+? NO_AnnesBurg_75.asset: 替换了 276 个 GUID
+? NO_AnnesBurg_76.asset: 替换了 223 个 GUID
+? NO_AnnesBurg_77.asset: 替换了 29 个 GUID
+? NO_AnnesBurg_8.asset: 替换了 256 个 GUID
+? NO_AnnesBurg_9.asset: 替换了 243 个 GUID
+? NO_Antarctica_1.asset: 替换了 178 个 GUID
+? NO_Antarctica_10.asset: 替换了 204 个 GUID
+? NO_Antarctica_11.asset: 替换了 138 个 GUID
+? NO_Antarctica_12.asset: 替换了 230 个 GUID
+? NO_Antarctica_13.asset: 替换了 299 个 GUID
+? NO_Antarctica_14.asset: 替换了 220 个 GUID
+? NO_Antarctica_15.asset: 替换了 120 个 GUID
+? NO_Antarctica_16.asset: 替换了 199 个 GUID
+? NO_Antarctica_17.asset: 替换了 175 个 GUID
+? NO_Antarctica_18.asset: 替换了 195 个 GUID
+? NO_Antarctica_19.asset: 替换了 193 个 GUID
+? NO_Antarctica_2.asset: 替换了 173 个 GUID
+? NO_Antarctica_20.asset: 替换了 226 个 GUID
+? NO_Antarctica_21.asset: 替换了 170 个 GUID
+? NO_Antarctica_22.asset: 替换了 160 个 GUID
+? NO_Antarctica_23.asset: 替换了 160 个 GUID
+? NO_Antarctica_24.asset: 替换了 249 个 GUID
+? NO_Antarctica_25.asset: 替换了 203 个 GUID
+? NO_Antarctica_26.asset: 替换了 276 个 GUID
+? NO_Antarctica_27.asset: 替换了 201 个 GUID
+? NO_Antarctica_28.asset: 替换了 123 个 GUID
+? NO_Antarctica_29.asset: 替换了 156 个 GUID
+? NO_Antarctica_3.asset: 替换了 182 个 GUID
+? NO_Antarctica_30.asset: 替换了 194 个 GUID
+? NO_Antarctica_31.asset: 替换了 195 个 GUID
+? NO_Antarctica_32.asset: 替换了 179 个 GUID
+? NO_Antarctica_33.asset: 替换了 219 个 GUID
+? NO_Antarctica_34.asset: 替换了 228 个 GUID
+? NO_Antarctica_35.asset: 替换了 203 个 GUID
+? NO_Antarctica_36.asset: 替换了 230 个 GUID
+? NO_Antarctica_37.asset: 替换了 256 个 GUID
+? NO_Antarctica_4.asset: 替换了 139 个 GUID
+? NO_Antarctica_5.asset: 替换了 197 个 GUID
+? NO_Antarctica_6.asset: 替换了 172 个 GUID
+? NO_Antarctica_7.asset: 替换了 230 个 GUID
+? NO_Antarctica_8.asset: 替换了 201 个 GUID
+? NO_Antarctica_9.asset: 替换了 278 个 GUID
+? NO_AnubisLair_1.asset: 替换了 160 个 GUID
+? NO_AnubisLair_10.asset: 替换了 119 个 GUID
+? NO_AnubisLair_11.asset: 替换了 173 个 GUID
+? NO_AnubisLair_12.asset: 替换了 181 个 GUID
+? NO_AnubisLair_13.asset: 替换了 253 个 GUID
+? NO_AnubisLair_14.asset: 替换了 239 个 GUID
+? NO_AnubisLair_15.asset: 替换了 211 个 GUID
+? NO_AnubisLair_16.asset: 替换了 160 个 GUID
+? NO_AnubisLair_17.asset: 替换了 194 个 GUID
+? NO_AnubisLair_18.asset: 替换了 250 个 GUID
+? NO_AnubisLair_19.asset: 替换了 239 个 GUID
+? NO_AnubisLair_2.asset: 替换了 174 个 GUID
+? NO_AnubisLair_20.asset: 替换了 277 个 GUID
+? NO_AnubisLair_21.asset: 替换了 221 个 GUID
+? NO_AnubisLair_22.asset: 替换了 235 个 GUID
+? NO_AnubisLair_23.asset: 替换了 258 个 GUID
+? NO_AnubisLair_24.asset: 替换了 226 个 GUID
+? NO_AnubisLair_25.asset: 替换了 216 个 GUID
+? NO_AnubisLair_26.asset: 替换了 237 个 GUID
+? NO_AnubisLair_27.asset: 替换了 253 个 GUID
+? NO_AnubisLair_28.asset: 替换了 289 个 GUID
+? NO_AnubisLair_29.asset: 替换了 298 个 GUID
+? NO_AnubisLair_3.asset: 替换了 192 个 GUID
+? NO_AnubisLair_30.asset: 替换了 214 个 GUID
+? NO_AnubisLair_31.asset: 替换了 256 个 GUID
+? NO_AnubisLair_32.asset: 替换了 279 个 GUID
+? NO_AnubisLair_33.asset: 替换了 306 个 GUID
+  NO_AnubisLair_34.asset: 无需转换
+? NO_AnubisLair_35.asset: 替换了 286 个 GUID
+  NO_AnubisLair_36.asset: 无需转换
+? NO_AnubisLair_37.asset: 替换了 330 个 GUID
+? NO_AnubisLair_38.asset: 替换了 240 个 GUID
+? NO_AnubisLair_39.asset: 替换了 229 个 GUID
+? NO_AnubisLair_4.asset: 替换了 212 个 GUID
+? NO_AnubisLair_40.asset: 替换了 252 个 GUID
+? NO_AnubisLair_41.asset: 替换了 251 个 GUID
+? NO_AnubisLair_42.asset: 替换了 315 个 GUID
+  NO_AnubisLair_43.asset: 无需转换
+? NO_AnubisLair_44.asset: 替换了 256 个 GUID
+  NO_AnubisLair_45.asset: 无需转换
+? NO_AnubisLair_46.asset: 替换了 255 个 GUID
+  NO_AnubisLair_47.asset: 无需转换
+  NO_AnubisLair_48.asset: 无需转换
+? NO_AnubisLair_49.asset: 替换了 240 个 GUID
+? NO_AnubisLair_5.asset: 替换了 176 个 GUID
+  NO_AnubisLair_50.asset: 无需转换
+  NO_AnubisLair_51.asset: 无需转换
+? NO_AnubisLair_6.asset: 替换了 192 个 GUID
+? NO_AnubisLair_7.asset: 替换了 166 个 GUID
+? NO_AnubisLair_8.asset: 替换了 180 个 GUID
+? NO_AnubisLair_9.asset: 替换了 131 个 GUID
+? NO_AsteroidX57_1.asset: 替换了 260 个 GUID
+? NO_AsteroidX57_10.asset: 替换了 232 个 GUID
+? NO_AsteroidX57_11.asset: 替换了 279 个 GUID
+? NO_AsteroidX57_12.asset: 替换了 239 个 GUID
+? NO_AsteroidX57_13.asset: 替换了 302 个 GUID
+? NO_AsteroidX57_14.asset: 替换了 293 个 GUID
+? NO_AsteroidX57_15.asset: 替换了 244 个 GUID
+? NO_AsteroidX57_16.asset: 替换了 164 个 GUID
+? NO_AsteroidX57_17.asset: 替换了 272 个 GUID
+? NO_AsteroidX57_18.asset: 替换了 374 个 GUID
+? NO_AsteroidX57_19.asset: 替换了 321 个 GUID
+? NO_AsteroidX57_2.asset: 替换了 140 个 GUID
+? NO_AsteroidX57_20.asset: 替换了 254 个 GUID
+  NO_AsteroidX57_21.asset: 无需转换
+? NO_AsteroidX57_22.asset: 替换了 213 个 GUID
+? NO_AsteroidX57_23.asset: 替换了 189 个 GUID
+? NO_AsteroidX57_3.asset: 替换了 238 个 GUID
+? NO_AsteroidX57_4.asset: 替换了 242 个 GUID
+? NO_AsteroidX57_5.asset: 替换了 260 个 GUID
+? NO_AsteroidX57_6.asset: 替换了 280 个 GUID
+? NO_AsteroidX57_7.asset: 替换了 282 个 GUID
+? NO_AsteroidX57_8.asset: 替换了 198 个 GUID
+? NO_AsteroidX57_9.asset: 替换了 329 个 GUID
+? NO_BikiniBottom_1.asset: 替换了 232 个 GUID
+? NO_BikiniBottom_10.asset: 替换了 157 个 GUID
+? NO_BikiniBottom_11.asset: 替换了 217 个 GUID
+? NO_BikiniBottom_12.asset: 替换了 217 个 GUID
+? NO_BikiniBottom_13.asset: 替换了 216 个 GUID
+? NO_BikiniBottom_14.asset: 替换了 286 个 GUID
+? NO_BikiniBottom_15.asset: 替换了 228 个 GUID
+? NO_BikiniBottom_16.asset: 替换了 191 个 GUID
+? NO_BikiniBottom_17.asset: 替换了 237 个 GUID
+? NO_BikiniBottom_18.asset: 替换了 244 个 GUID
+? NO_BikiniBottom_19.asset: 替换了 264 个 GUID
+? NO_BikiniBottom_2.asset: 替换了 185 个 GUID
+? NO_BikiniBottom_20.asset: 替换了 231 个 GUID
+? NO_BikiniBottom_21.asset: 替换了 233 个 GUID
+? NO_BikiniBottom_22.asset: 替换了 153 个 GUID
+? NO_BikiniBottom_23.asset: 替换了 198 个 GUID
+? NO_BikiniBottom_24.asset: 替换了 234 个 GUID
+? NO_BikiniBottom_25.asset: 替换了 182 个 GUID
+? NO_BikiniBottom_26.asset: 替换了 191 个 GUID
+? NO_BikiniBottom_27.asset: 替换了 339 个 GUID
+? NO_BikiniBottom_28.asset: 替换了 234 个 GUID
+? NO_BikiniBottom_29.asset: 替换了 235 个 GUID
+? NO_BikiniBottom_3.asset: 替换了 352 个 GUID
+? NO_BikiniBottom_30.asset: 替换了 257 个 GUID
+? NO_BikiniBottom_31.asset: 替换了 255 个 GUID
+? NO_BikiniBottom_32.asset: 替换了 244 个 GUID
+? NO_BikiniBottom_33.asset: 替换了 195 个 GUID
+  NO_BikiniBottom_34.asset: 无需转换
+? NO_BikiniBottom_35.asset: 替换了 371 个 GUID
+? NO_BikiniBottom_4.asset: 替换了 224 个 GUID
+? NO_BikiniBottom_5.asset: 替换了 278 个 GUID
+? NO_BikiniBottom_6.asset: 替换了 193 个 GUID
+? NO_BikiniBottom_7.asset: 替换了 158 个 GUID
+? NO_BikiniBottom_8.asset: 替换了 203 个 GUID
+? NO_BikiniBottom_9.asset: 替换了 235 个 GUID
+? NO_Blackwater_1.asset: 替换了 246 个 GUID
+? NO_Blackwater_10.asset: 替换了 180 个 GUID
+? NO_Blackwater_11.asset: 替换了 135 个 GUID
+? NO_Blackwater_12.asset: 替换了 190 个 GUID
+? NO_Blackwater_13.asset: 替换了 240 个 GUID
+? NO_Blackwater_14.asset: 替换了 176 个 GUID
+? NO_Blackwater_15.asset: 替换了 326 个 GUID
+? NO_Blackwater_16.asset: 替换了 271 个 GUID
+? NO_Blackwater_17.asset: 替换了 193 个 GUID
+? NO_Blackwater_18.asset: 替换了 230 个 GUID
+? NO_Blackwater_19.asset: 替换了 249 个 GUID
+? NO_Blackwater_2.asset: 替换了 166 个 GUID
+? NO_Blackwater_20.asset: 替换了 183 个 GUID
+? NO_Blackwater_21.asset: 替换了 186 个 GUID
+? NO_Blackwater_22.asset: 替换了 174 个 GUID
+? NO_Blackwater_23.asset: 替换了 162 个 GUID
+? NO_Blackwater_24.asset: 替换了 179 个 GUID
+? NO_Blackwater_25.asset: 替换了 180 个 GUID
+? NO_Blackwater_26.asset: 替换了 287 个 GUID
+? NO_Blackwater_27.asset: 替换了 269 个 GUID
+? NO_Blackwater_28.asset: 替换了 285 个 GUID
+? NO_Blackwater_29.asset: 替换了 225 个 GUID
+? NO_Blackwater_3.asset: 替换了 181 个 GUID
+? NO_Blackwater_30.asset: 替换了 210 个 GUID
+? NO_Blackwater_31.asset: 替换了 238 个 GUID
+? NO_Blackwater_32.asset: 替换了 241 个 GUID
+? NO_Blackwater_33.asset: 替换了 264 个 GUID
+? NO_Blackwater_34.asset: 替换了 321 个 GUID
+? NO_Blackwater_35.asset: 替换了 201 个 GUID
+? NO_Blackwater_36.asset: 替换了 340 个 GUID
+? NO_Blackwater_37.asset: 替换了 249 个 GUID
+  NO_Blackwater_38.asset: 无需转换
+? NO_Blackwater_39.asset: 替换了 317 个 GUID
+? NO_Blackwater_4.asset: 替换了 149 个 GUID
+  NO_Blackwater_40.asset: 无需转换
+? NO_Blackwater_5.asset: 替换了 167 个 GUID
+? NO_Blackwater_6.asset: 替换了 205 个 GUID
+? NO_Blackwater_7.asset: 替换了 169 个 GUID
+? NO_Blackwater_8.asset: 替换了 215 个 GUID

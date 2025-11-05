@@ -3,6 +3,7 @@ using AssetRipper.Assets.IO;
 using AssetRipper.Assets.Metadata;
 using AssetRipper.IO.Files.SerializedFiles;
 using AssetRipper.IO.Files.SerializedFiles.Parser;
+using AssetRipper.Primitives;
 
 namespace AssetRipper.Assets.Collections;
 
@@ -61,6 +62,7 @@ public sealed class SerializedAssetCollection : AssetCollection
 			Platform = file.Platform,
 			Flags = file.Flags,
 			EndianType = file.EndianType,
+			Guid = TryParseGuidFromFileName(file.NameFixed),
 		};
 		ReadOnlySpan<FileIdentifier> fileDependencies = file.Dependencies;
 		if (fileDependencies.Length > 0)
@@ -69,6 +71,80 @@ public sealed class SerializedAssetCollection : AssetCollection
 		}
 		ReadData(collection, file, factory);
 		return collection;
+	}
+
+	/// <summary>
+	/// Attempts to parse a GUID from a file name.
+	/// </summary>
+	/// <remarks>
+	/// APK and AssetBundle files often use GUIDs as file names or include them in the name (e.g., "CAB-30b6e6ebf780b304f83e144c61a2e054").
+	/// This method extracts the GUID for proper dependency resolution.
+	/// </remarks>
+	private static UnityGuid TryParseGuidFromFileName(string fileName)
+	{
+		if (string.IsNullOrEmpty(fileName))
+		{
+			return default;
+		}
+
+		// Try to parse the entire filename as a GUID (32 hex characters)
+		if (fileName.Length == 32 && IsHexString(fileName))
+		{
+			return ParseGuid(fileName);
+		}
+
+		// Try to find GUID pattern in filename (e.g., "CAB-<guid>")
+		int guidStart = fileName.LastIndexOf('-');
+		if (guidStart >= 0 && guidStart + 33 <= fileName.Length)
+		{
+			string guidPart = fileName.Substring(guidStart + 1, 32);
+			if (IsHexString(guidPart))
+			{
+				return ParseGuid(guidPart);
+			}
+		}
+
+		// Try to find a 32-character hex string anywhere in the filename
+		for (int i = 0; i <= fileName.Length - 32; i++)
+		{
+			string candidate = fileName.Substring(i, 32);
+			if (IsHexString(candidate))
+			{
+				return ParseGuid(candidate);
+			}
+		}
+
+		return default;
+	}
+
+	private static bool IsHexString(string s)
+	{
+		foreach (char c in s)
+		{
+			if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static UnityGuid ParseGuid(string hex)
+	{
+		// GUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+		// Unity GUID is stored as 4 uint values
+		try
+		{
+			uint a = Convert.ToUInt32(hex.Substring(0, 8), 16);
+			uint b = Convert.ToUInt32(hex.Substring(8, 8), 16);
+			uint c = Convert.ToUInt32(hex.Substring(16, 8), 16);
+			uint d = Convert.ToUInt32(hex.Substring(24, 8), 16);
+			return new UnityGuid(a, b, c, d);
+		}
+		catch
+		{
+			return default;
+		}
 	}
 
 	private static void ReadData(SerializedAssetCollection collection, SerializedFile file, AssetFactoryBase factory)

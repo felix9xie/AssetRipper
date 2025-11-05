@@ -1,0 +1,46 @@
+╔════════════════════════════════════════════════════════════╗
+║     Addressable GUID 映射转换工具 v1.0                    ║
+╚════════════════════════════════════════════════════════════╝
+
+=== 步骤 1: 解析 Addressable Catalog ===
+Catalog: D:\Work\Tools\AssetRipper-master\AssetRipper\Source\0Bins\AssetRipper.GUI.Free\Release\temp\d212\f050f870\assets\aa\catalog.json
+
+Bucket 数量: 22552
+正在解析 GUID 映射...
+? 解析完成！找到 9701 个 GUID 映射
+
+=== 步骤 2: 扫描导出的 Unity 项目 ===
+项目路径: D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251105_035302\ExportedProject
+
+找到 54678 个 .meta 文件
+正在提取 GUID...
+? 扫描完成！处理了 54023 个资源
+
+=== 步骤 3: 建立 GUID 映射关系 ===
+总共需要处理 9701 个 GUID...
+
+? 未找到匹配: dabcc410b8f80f340968418efc800892 → Assets/_Main/Images/UI/MainUI/Icons/compass_icon.png
+? 未找到匹配: 6d155f16f7a5a4642a7ed1b1d8131498 → Assets/_Main/Images/UI/MainUI/Icons/out_of_picture.png
+? 未找到匹配: ef10a84bf0f281b4eb0ed463d1875ac5 → Assets/_Main/Images/UI/MainUI/Icons/Weekly_Icons/compass.png
+? 未找到匹配: 4c9ae735e77cf6847b546374e65b09f9 → Assets/_Main/Images/UI/MainUI/Icons/Weekly_Icons/magnet.png
+? 未找到匹配: 8e7d82ddb62d6b342801c8ab3f6c022f → Assets/_Main/Images/UI/MainUI/Leaderboard/gold.png
+? 未找到匹配: 8ddf909c7e4e2c5438cf1ae08f1c510e → Assets/_Main/Images/UI/MainUI/Leaderboard/UserImgs/avatar_10.png
+? 未找到匹配: 85a9f31cbcef16c40b77925ae0a717e8 → Assets/_Main/Images/UI/MainUI/Leaderboard/UserImgs/avatar_14.png
+? 未找到匹配: f868a7c74871a8a45b39b6658854efbc → Assets/_Main/Images/UI/MainUI/Leaderboard/UserImgs/avatar_2.png
+? 未找到匹配: dde4841f265ffbe4fb6016cd37d29dfc → Assets/_Main/Images/UI/MainUI/Leaderboard/UserImgs/avatar_6.png
+? 未找到匹配: 7aa25c2b44c38f1478a8ac62913d7a25 → Assets/_Main/Images/UI/MainUI/Leaderboard/UserImgs/avatar_default.png
+  进度: 5% (486/9701) - 已匹配: 474, 未匹配: 12
+  进度: 10% (971/9701) - 已匹配: 959, 未匹配: 12
+  进度: 15% (1456/9701) - 已匹配: 1444, 未匹配: 12
+  进度: 20% (1941/9701) - 已匹配: 1929, 未匹配: 12
+  进度: 25% (2426/9701) - 已匹配: 2414, 未匹配: 12
+  进度: 30% (2911/9701) - 已匹配: 2899, 未匹配: 12
+  进度: 35% (3396/9701) - 已匹配: 3384, 未匹配: 12
+  进度: 40% (3881/9701) - 已匹配: 3869, 未匹配: 12
+  进度: 45% (4366/9701) - 已匹配: 4354, 未匹配: 12
+  进度: 50% (4851/9701) - 已匹配: 4839, 未匹配: 12
+  进度: 55% (5336/9701) - 已匹配: 5324, 未匹配: 12
+  进度: 60% (5821/9701) - 已匹配: 5777, 未匹配: 44
+  进度: 65% (6306/9701) - 已匹配: 6092, 未匹配: 214
+  进度: 70% (6791/9701) - 已匹配: 6092, 未匹配: 699
+  进度: 75% (7276/9701) - 已匹配: 6092, 未匹配: 1184
