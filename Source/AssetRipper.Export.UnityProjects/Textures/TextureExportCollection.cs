@@ -50,6 +50,24 @@ public class TextureExportCollection : AssetsExportCollection<ITexture2D>
 
 	protected override bool ExportInner(IExportContainer container, string filePath, string dirPath, FileSystem fileSystem)
 	{
+		// Track format conversions for Addressable GUID mapping
+		// This is critical for .psb files which get converted to .png during export
+		string? originalExtension = Asset.OriginalExtension;
+		string exportExtension = System.IO.Path.GetExtension(filePath).TrimStart('.');
+		
+		// If the file extension changed during export (e.g., psb -> png), record it
+		if (!string.IsNullOrEmpty(originalExtension) && 
+		    !originalExtension.Equals(exportExtension, StringComparison.OrdinalIgnoreCase))
+		{
+			// Get the relative path from the project directory
+			string relativePath = GetRelativePath(dirPath, filePath);
+			// Reconstruct the original path with the original extension
+			string pathWithoutExt = System.IO.Path.ChangeExtension(relativePath, null);
+			string originalPath = pathWithoutExt + "." + originalExtension;
+			
+			FormatConversionTracker.RecordConversion(originalPath, relativePath);
+		}
+		
 		return AssetExporter.Export(container, Asset, filePath, fileSystem);
 	}
 
@@ -60,6 +78,21 @@ public class TextureExportCollection : AssetsExportCollection<ITexture2D>
 			return ((TextureAssetExporter)AssetExporter).ImageExportFormat.GetFileExtension();
 		}
 		return base.GetExportExtension(asset);
+	}
+	
+	private static string GetRelativePath(string basePath, string fullPath)
+	{
+		if (!basePath.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString()) &&
+		    !basePath.EndsWith(System.IO.Path.AltDirectorySeparatorChar.ToString()))
+		{
+			basePath += System.IO.Path.DirectorySeparatorChar;
+		}
+		
+		Uri baseUri = new Uri(basePath);
+		Uri fullUri = new Uri(fullPath);
+		Uri relativeUri = baseUri.MakeRelativeUri(fullUri);
+		
+		return Uri.UnescapeDataString(relativeUri.ToString()).Replace('/', System.IO.Path.DirectorySeparatorChar);
 	}
 
 	protected override long GenerateExportID(IUnityObjectBase asset)

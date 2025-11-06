@@ -97,6 +97,9 @@ public class ExportHandler
 		Logger.Info(LogCategory.Export, $"Game files have these Unity versions: {GetListOfVersions(gameData.GameBundle)}");
 		Logger.Info(LogCategory.Export, $"Exporting to Unity version {gameData.ProjectVersion}");
 
+		// Clear format conversion tracking for new export
+		FormatConversionTracker.Clear();
+
 		Settings.ExportRootPath = outputPath;
 		Settings.SetProjectSettings(gameData.ProjectVersion);
 
@@ -134,6 +137,7 @@ public class ExportHandler
 		yield return new StreamingAssetsPostExporter();
 		yield return new DllPostExporter();
 		yield return new PathIdMapExporter();
+		yield return new FormatConversionMapExporter(); // Export format conversion map for Addressable GUID mapping
 	}
 
 	public GameData LoadAndProcess(IReadOnlyList<string> paths, FileSystem fileSystem)

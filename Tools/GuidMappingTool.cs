@@ -16,6 +16,7 @@ namespace AssetRipper.Tools
         private readonly Dictionary<string, string> _guidToPath = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _pathToNewGuid = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _oldGuidToNewGuid = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _formatConversions = new Dictionary<string, string>(); // Original path -> Exported path
 
         public class CatalogData
         {
@@ -99,6 +100,40 @@ namespace AssetRipper.Tools
         }
 
         /// <summary>
+        /// 步骤 1.5: 加载格式转换映射（可选，用于处理 .psb → .png 等转换）
+        /// </summary>
+        public void LoadFormatConversions(string exportedProjectPath)
+        {
+            string formatConversionFile = Path.Combine(exportedProjectPath, "format_conversions.json");
+            
+            if (File.Exists(formatConversionFile))
+            {
+                Console.WriteLine("=== 加载格式转换映射 ===");
+                Console.WriteLine($"文件: {formatConversionFile}");
+                
+                try
+                {
+                    string json = File.ReadAllText(formatConversionFile);
+                    var conversions = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                    
+                    if (conversions != null)
+                    {
+                        foreach (var kvp in conversions)
+                        {
+                            _formatConversions[kvp.Key.Replace('\\', '/').ToLowerInvariant()] = kvp.Value.Replace('\\', '/');
+                        }
+                        Console.WriteLine($"✅ 加载了 {_formatConversions.Count} 个格式转换映射");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠ 加载格式转换映射失败: {ex.Message}");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        /// <summary>
         /// 步骤 2: 扫描导出项目，建立资源路径 → 新 GUID 的映射
         /// </summary>
         public void ScanExportedProject(string exportedProjectPath)
@@ -160,6 +195,9 @@ namespace AssetRipper.Tools
             Console.WriteLine("=== 步骤 3: 建立 GUID 映射关系 ===");
             Console.WriteLine($"总共需要处理 {_guidToPath.Count} 个 GUID...");
             Console.WriteLine();
+            
+            // 初始化查找缓存以加速查找
+            InitializeLookupCache();
 
             int matchedCount = 0;
             int unmatchedCount = 0;
@@ -341,6 +379,40 @@ namespace AssetRipper.Tools
 
         // ===== Helper Methods =====
 
+        // 缓存：小写路径 → 原始路径
+        private Dictionary<string, string> _pathLookupCache = new Dictionary<string, string>();
+        
+        // 缓存：文件名 → 路径列表
+        private Dictionary<string, List<string>> _fileNameLookupCache = new Dictionary<string, List<string>>();
+
+        // 初始化查找缓存（在 ScanExportedProject 之后调用）
+        private void InitializeLookupCache()
+        {
+            Console.WriteLine("正在初始化查找缓存...");
+            
+            foreach (var kvp in _pathToNewGuid)
+            {
+                var path = kvp.Key;
+                var lowerPath = path.ToLowerInvariant();
+                
+                // 路径缓存
+                if (!_pathLookupCache.ContainsKey(lowerPath))
+                {
+                    _pathLookupCache[lowerPath] = path;
+                }
+                
+                // 文件名缓存
+                var fileName = Path.GetFileNameWithoutExtension(path).ToLowerInvariant();
+                if (!_fileNameLookupCache.ContainsKey(fileName))
+                {
+                    _fileNameLookupCache[fileName] = new List<string>();
+                }
+                _fileNameLookupCache[fileName].Add(path);
+            }
+            
+            Console.WriteLine($"✅ 缓存初始化完成！路径: {_pathLookupCache.Count}, 文件名: {_fileNameLookupCache.Count}");
+        }
+
         private string FindMatchingGuid(string resourcePath)
         {
             if (string.IsNullOrEmpty(resourcePath))
@@ -349,42 +421,76 @@ namespace AssetRipper.Tools
             // 标准化路径
             resourcePath = resourcePath.Replace('\\', '/').ToLowerInvariant();
 
-            // 1. 尝试精确匹配
-            foreach (var kvp in _pathToNewGuid)
+            // 1. 尝试精确匹配（使用缓存）
+            if (_pathLookupCache.TryGetValue(resourcePath, out string exactPath))
             {
-                if (kvp.Key.ToLowerInvariant().Equals(resourcePath, StringComparison.OrdinalIgnoreCase))
-                    return kvp.Value;
+                return _pathToNewGuid[exactPath];
             }
 
-            // 2. 针对 .psb 文件，尝试替换扩展名为 .png
-            if (resourcePath.EndsWith(".psb", StringComparison.OrdinalIgnoreCase))
+            // 2. 使用格式转换映射（处理 .psb → .png 等转换）
+            if (_formatConversions.TryGetValue(resourcePath, out string convertedPath))
             {
-                var pngPath = resourcePath.Substring(0, resourcePath.Length - 4) + ".png";
-                foreach (var kvp in _pathToNewGuid)
+                var convertedLower = convertedPath.ToLowerInvariant();
+                if (_pathLookupCache.TryGetValue(convertedLower, out string convertedExactPath))
                 {
-                    if (kvp.Key.ToLowerInvariant().Equals(pngPath, StringComparison.OrdinalIgnoreCase))
-                        return kvp.Value;
+                    return _pathToNewGuid[convertedExactPath];
                 }
             }
 
-            // 3. 尝试文件名匹配
-            var fileName = Path.GetFileNameWithoutExtension(resourcePath);
-            var matches = _pathToNewGuid.Where(kvp => 
-                Path.GetFileNameWithoutExtension(kvp.Key).Equals(fileName, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            // 3. 如果没有格式转换映射，尝试手动替换 .psb 为 .png（兼容旧版本）
+            if (resourcePath.EndsWith(".psb", StringComparison.OrdinalIgnoreCase))
+            {
+                var pngPath = resourcePath.Substring(0, resourcePath.Length - 4) + ".png";
+                if (_pathLookupCache.TryGetValue(pngPath, out string pngExactPath))
+                {
+                    return _pathToNewGuid[pngExactPath];
+                }
+            }
 
-            if (matches.Count == 1)
-                return matches[0].Value;
+            // 4. 尝试文件名匹配（使用缓存）
+            var fileName = Path.GetFileNameWithoutExtension(resourcePath).ToLowerInvariant();
+            if (_fileNameLookupCache.TryGetValue(fileName, out List<string> matches))
+            {
+                if (matches.Count == 1)
+                {
+                    return _pathToNewGuid[matches[0]];
+                }
+            }
 
-            // 4. 尝试部分路径匹配
-            matches = _pathToNewGuid.Where(kvp => 
-                kvp.Key.ToLowerInvariant().Contains(fileName.ToLowerInvariant()))
-                .ToList();
-
-            if (matches.Count == 1)
-                return matches[0].Value;
+            // 5. 尝试部分路径匹配（只在文件名匹配有多个结果时才使用）
+            if (matches != null && matches.Count > 1)
+            {
+                // 尝试找到路径中包含更多匹配部分的
+                var pathParts = resourcePath.Split('/');
+                var bestMatch = matches
+                    .Select(m => new { Path = m, Score = CountMatchingParts(pathParts, m.ToLowerInvariant().Split('/')) })
+                    .OrderByDescending(x => x.Score)
+                    .FirstOrDefault();
+                
+                if (bestMatch != null && bestMatch.Score > 0)
+                {
+                    return _pathToNewGuid[bestMatch.Path];
+                }
+            }
 
             return null;
+        }
+        
+        private int CountMatchingParts(string[] parts1, string[] parts2)
+        {
+            int score = 0;
+            int minLen = Math.Min(parts1.Length, parts2.Length);
+            
+            // 从后往前比较（文件名最重要）
+            for (int i = 1; i <= minLen; i++)
+            {
+                if (parts1[parts1.Length - i].Equals(parts2[parts2.Length - i], StringComparison.OrdinalIgnoreCase))
+                {
+                    score += i; // 越靠近文件名的匹配权重越高
+                }
+            }
+            
+            return score;
         }
 
         private static bool IsGuid(string str)

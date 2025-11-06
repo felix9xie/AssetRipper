@@ -24,10 +24,10 @@ namespace AssetRipper.Tools
                 // var outputPath = @"D:\Work\Demo\LevelDataUnpack\Assets\leveldata_converted";
                 // var mappingTablePath = @"D:\Work\Demo\LevelDataUnpack\guid_mapping_table.txt";
 
-                var exportedProjectPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251105_035302\ExportedProject";
-                var levelDataPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251105_035302\ExportedProject\Assets\Resources\leveldata";
-                var outputPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251105_035302\ExportedProject\Assets\Resources\leveldata_converted";
-                var mappingTablePath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251105_035302\ExportedProject\guid_mapping_table.txt";
+                var exportedProjectPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251106_024741\ExportedProject";
+                var levelDataPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251106_024741\ExportedProject\Assets\Resources\leveldata";
+                var outputPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251106_024741\ExportedProject\Assets\Resources\leveldata_converted";
+                var mappingTablePath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251106_024741\ExportedProject\guid_mapping_table.txt";
 
                 // 检查路径
                 if (!File.Exists(catalogPath))
@@ -56,6 +56,9 @@ namespace AssetRipper.Tools
 
                 // 步骤 1: 加载 catalog 映射
                 tool.LoadCatalogMappings(catalogPath);
+
+                // 步骤 1.5: 加载格式转换映射（用于 .psb → .png 等）
+                tool.LoadFormatConversions(exportedProjectPath);
 
                 // 步骤 2: 扫描导出项目
                 tool.ScanExportedProject(exportedProjectPath);
