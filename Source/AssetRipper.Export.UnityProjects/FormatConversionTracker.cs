@@ -38,12 +38,35 @@ public static class FormatConversionTracker
 
 			string filePath = fileSystem.Path.Join(projectDirectory, "format_conversions.json");
 			
-			var jsonOptions = new JsonSerializerOptions
-			{
-				WriteIndented = true
-			};
+		var jsonOptions = new JsonSerializerOptions
+		{
+			WriteIndented = true,
+			TypeInfoResolver = System.Text.Json.Serialization.Metadata.JsonTypeInfoResolver.Combine()
+		};
 
-			string json = JsonSerializer.Serialize(_conversions, jsonOptions);
+	// Use ToString-based fallback for AOT compatibility
+	string json;
+	try
+	{
+		json = JsonSerializer.Serialize(_conversions, jsonOptions);
+	}
+	catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException)
+	{
+		// Fallback: manual JSON generation for AOT compatibility
+		Console.WriteLine($"[FormatConversionTracker] Using manual JSON fallback due to: {ex.GetType().Name}");
+		var sb = new System.Text.StringBuilder();
+		sb.AppendLine("{");
+		bool first = true;
+		foreach (var kvp in _conversions)
+		{
+			if (!first) sb.AppendLine(",");
+			first = false;
+			sb.Append($"  \"{kvp.Key}\": \"{kvp.Value}\"");
+		}
+		sb.AppendLine();
+		sb.AppendLine("}");
+		json = sb.ToString();
+	}
 			fileSystem.File.WriteAllText(filePath, json);
 			
 			// Also write a summary
@@ -96,5 +119,9 @@ public static class FormatConversionTracker
 		}
 	}
 }
+
+
+
+
 
 

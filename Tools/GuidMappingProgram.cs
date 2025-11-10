@@ -24,10 +24,10 @@ namespace AssetRipper.Tools
                 // var outputPath = @"D:\Work\Demo\LevelDataUnpack\Assets\leveldata_converted";
                 // var mappingTablePath = @"D:\Work\Demo\LevelDataUnpack\guid_mapping_table.txt";
 
-                var exportedProjectPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251106_024741\ExportedProject";
-                var levelDataPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251106_024741\ExportedProject\Assets\Resources\leveldata";
-                var outputPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251106_024741\ExportedProject\Assets\Resources\leveldata_converted";
-                var mappingTablePath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251106_024741\ExportedProject\guid_mapping_table.txt";
+                var exportedProjectPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject";
+                var levelDataPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject\Assets\Resources\leveldata";
+                var outputPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject\Assets\Resources\leveldata_converted";
+                var mappingTablePath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject\guid_mapping_table.txt";
 
                 // 检查路径
                 if (!File.Exists(catalogPath))
@@ -54,17 +54,14 @@ namespace AssetRipper.Tools
                 // 执行转换
                 var tool = new GuidMappingTool();
 
-                // 步骤 1: 加载 catalog 映射
-                tool.LoadCatalogMappings(catalogPath);
+                // 步骤 1: 从leveldata提取旧GUID和GroupId的关联
+                tool.ExtractGuidGroupIdPairs(levelDataPath);
 
-                // 步骤 1.5: 加载格式转换映射（用于 .psb → .png 等）
-                tool.LoadFormatConversions(exportedProjectPath);
-
-                // 步骤 2: 扫描导出项目
+                // 步骤 2: 扫描导出项目，建立文件名到新GUID的映射
                 tool.ScanExportedProject(exportedProjectPath);
 
-                // 步骤 3: 建立映射关系
-                tool.BuildGuidMapping();
+                // 步骤 3: 建立旧GUID到新GUID的映射（基于GroupId匹配）
+                tool.BuildGuidMappingFromGroupIds();
 
                 // 步骤 4: 转换关卡配置
                 tool.ConvertLevelDataGuids(levelDataPath, outputPath);

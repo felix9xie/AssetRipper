@@ -56,6 +56,10 @@ public class ExportHandler
 
 	protected virtual IEnumerable<IAssetProcessor> GetProcessors()
 	{
+		// Extract Bundle GUIDs and AssetReference mappings from leveldata
+		// This MUST run before any other processing
+		yield return new BundleGuidExtractor();
+		
 		// Assembly processors
 		yield return new AttributePolyfillGenerator();
 		yield return new MonoExplicitPropertyRepairProcessor();
@@ -103,6 +107,13 @@ public class ExportHandler
 		Settings.ExportRootPath = outputPath;
 		Settings.SetProjectSettings(gameData.ProjectVersion);
 
+		// Initialize Addressable GUID resolver
+		// Search for catalog.json in the original game directory
+		if (gameData.PlatformStructure?.RootPath != null)
+		{
+			AddressableGuidResolver.Initialize(gameData.PlatformStructure.RootPath);
+		}
+
 		ProjectExporter projectExporter = new(Settings, gameData.AssemblyManager);
 		BeforeExport(projectExporter);
 		projectExporter.DoFinalOverrides(Settings);
@@ -138,6 +149,7 @@ public class ExportHandler
 		yield return new DllPostExporter();
 		yield return new PathIdMapExporter();
 		yield return new FormatConversionMapExporter(); // Export format conversion map for Addressable GUID mapping
+		yield return new AddressableGuidMappingPostExporter(); // Export Addressable GUID mapping records
 	}
 
 	public GameData LoadAndProcess(IReadOnlyList<string> paths, FileSystem fileSystem)

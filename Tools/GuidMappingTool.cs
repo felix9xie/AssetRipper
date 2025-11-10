@@ -13,10 +13,17 @@ namespace AssetRipper.Tools
     /// </summary>
     public class GuidMappingTool
     {
-        private readonly Dictionary<string, string> _guidToPath = new Dictionary<string, string>();
+        // 旧GUID → GroupId的映射（从leveldata中提取）
+        private readonly Dictionary<string, string> _oldGuidToGroupId = new Dictionary<string, string>();
+        
+        // 文件名（包括GroupId） → 新GUID的映射（从导出项目扫描）
+        private readonly Dictionary<string, string> _fileNameToNewGuid = new Dictionary<string, string>();
+        
+        // 完整路径 → 新GUID的映射（用于精确匹配）
         private readonly Dictionary<string, string> _pathToNewGuid = new Dictionary<string, string>();
+        
+        // 最终映射：旧GUID → 新GUID
         private readonly Dictionary<string, string> _oldGuidToNewGuid = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> _formatConversions = new Dictionary<string, string>(); // Original path -> Exported path
 
         public class CatalogData
         {
@@ -28,12 +35,91 @@ namespace AssetRipper.Tools
 
             [JsonProperty("m_BucketDataString")]
             public string BucketDataString { get; set; }
+
+            [JsonProperty("m_EntryDataString")]
+            public string EntryDataString { get; set; }
+
+            [JsonProperty("m_ProviderIds")]
+            public string[] ProviderIds { get; set; }
+
+            [JsonProperty("m_ResourceTypes")]
+            public ResourceType[] ResourceTypes { get; set; }
+        }
+
+        public class ResourceType
+        {
+            [JsonProperty("m_AssemblyName")]
+            public string AssemblyName { get; set; }
+
+            [JsonProperty("m_ClassName")]
+            public string ClassName { get; set; }
         }
 
         /// <summary>
+        /// 步骤 1: 从leveldata提取旧GUID和GroupId的关联
+        /// </summary>
+        public void ExtractGuidGroupIdPairs(string levelDataPath)
+        {
+            Console.WriteLine("=== 步骤 1: 从LevelData提取GUID-GroupId关联 ===");
+            Console.WriteLine($"关卡数据目录: {levelDataPath}");
+            Console.WriteLine();
+
+            var files = Directory.GetFiles(levelDataPath, "*.asset", SearchOption.AllDirectories);
+            Console.WriteLine($"找到 {files.Length} 个关卡文件");
+
+            int totalPairs = 0;
+            foreach (var file in files)
+            {
+                var content = File.ReadAllText(file);
+                
+                // 提取所有 Stages 块（包含 GroupId 列表）
+                var stagesMatches = Regex.Matches(content, @"Stages:\s*\n((?:\s*- GroupId:.*\n)+)", RegexOptions.Multiline);
+                
+                foreach (Match stagesMatch in stagesMatches)
+                {
+                    // 提取该Stages块的所有GroupId
+                    var groupIdMatches = Regex.Matches(stagesMatch.Groups[1].Value, @"GroupId:\s*(\S+)");
+                    var groupIds = groupIdMatches.Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+                    
+                    // 查找该Stages块之后的CollectableDatas（在下一个Stages块之前）
+                    int stagesEnd = stagesMatch.Index + stagesMatch.Length;
+                    string remainingContent = content.Substring(stagesEnd);
+                    
+                    // 找到下一个Stages或文件末尾
+                    var nextStagesMatch = Regex.Match(remainingContent, @"Stages:");
+                    int searchEnd = nextStagesMatch.Success ? nextStagesMatch.Index : remainingContent.Length;
+                    string blockContent = remainingContent.Substring(0, searchEnd);
+                    
+                    // 在这个块中查找m_AssetGUID
+                    var guidMatches = Regex.Matches(blockContent, @"m_AssetGUID:\s*([0-9a-fA-F]{32})");
+                    
+                    // 将所有GUID关联到所有GroupId
+                    foreach (Match guidMatch in guidMatches)
+                    {
+                        string oldGuid = guidMatch.Groups[1].Value.ToLower();
+                        
+                        foreach (var groupId in groupIds)
+                        {
+                            if (!_oldGuidToGroupId.ContainsKey(oldGuid))
+                            {
+                                _oldGuidToGroupId[oldGuid] = groupId;
+                                totalPairs++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine($"✅ 提取完成！找到 {_oldGuidToGroupId.Count} 个唯一的旧GUID");
+            Console.WriteLine($"   总共 {totalPairs} 个GUID-GroupId关联");
+            Console.WriteLine();
+        }
+
+        /* 旧的catalog解析方法已废弃
+        /// <summary>
         /// 步骤 1: 从 catalog.json 解析原始 GUID → InternalId 映射
         /// </summary>
-        public void LoadCatalogMappings(string catalogPath)
+        public void LoadCatalogMappings_OLD(string catalogPath)
         {
             Console.WriteLine("=== 步骤 1: 解析 Addressable Catalog ===");
             Console.WriteLine($"Catalog: {catalogPath}");
@@ -44,93 +130,480 @@ namespace AssetRipper.Tools
                 throw new FileNotFoundException($"Catalog file not found: {catalogPath}");
             }
 
-            var json = File.ReadAllText(catalogPath);
-            var catalog = JsonConvert.DeserializeObject<CatalogData>(json);
+            try
+            {
+                var json = File.ReadAllText(catalogPath);
+                Console.WriteLine($"✓ 文件读取成功，大小: {json.Length} 字节");
 
-            // 解码 KeyDataString
+                var catalog = JsonConvert.DeserializeObject<CatalogData>(json);
+                
+                if (catalog == null)
+                {
+                    Console.WriteLine("❌ 反序列化失败: catalog 为 null");
+                    return;
+                }
+                
+                Console.WriteLine($"✓ JSON 反序列化成功");
+                Console.WriteLine($"  - InternalIds: {catalog.InternalIds?.Length ?? 0}");
+                Console.WriteLine($"  - KeyDataString: {(string.IsNullOrEmpty(catalog.KeyDataString) ? "空" : $"{catalog.KeyDataString.Length} 字符")}");
+                Console.WriteLine($"  - BucketDataString: {(string.IsNullOrEmpty(catalog.BucketDataString) ? "空" : $"{catalog.BucketDataString.Length} 字符")}");
+                Console.WriteLine($"  - EntryDataString: {(string.IsNullOrEmpty(catalog.EntryDataString) ? "空" : $"{catalog.EntryDataString.Length} 字符")}");
+                Console.WriteLine();
+
+            // 解码 KeyDataString (base64 → binary → keys)
             var keyData = Convert.FromBase64String(catalog.KeyDataString);
+            var keyCount = BitConverter.ToInt32(keyData, 0);
+            var keys = new object[keyCount];
+
+            Console.WriteLine($"Key 数量: {keyCount}");
+
+            int keyOffset = 4; // Skip the count
+            for (int i = 0; i < keyCount; i++)
+            {
+                // 根据Unity源代码，格式是：1字节类型 + 数据
+                if (keyOffset >= keyData.Length)
+                {
+                    keys[i] = $"OutOfBounds_at_{keyOffset}";
+                    break;
+                }
+                
+                // 读取1字节的类型（不是4字节！）
+                byte keyTypeByte = keyData[keyOffset];
+                keyOffset++;
+                
+                try
+                {
+                    switch (keyTypeByte)
+                    {
+                        case 0: // AsciiString
+                            {
+                                var strLength = BitConverter.ToInt32(keyData, keyOffset);
+                                keyOffset += 4;
+                                keys[i] = Encoding.ASCII.GetString(keyData, keyOffset, strLength);
+                                keyOffset += strLength;
+                                break;
+                            }
+                        case 1: // UnicodeString
+                            {
+                                var strLength = BitConverter.ToInt32(keyData, keyOffset);
+                                keyOffset += 4;
+                                keys[i] = Encoding.Unicode.GetString(keyData, keyOffset, strLength);
+                                keyOffset += strLength;
+                                break;
+                            }
+                        case 2: // UInt16
+                            {
+                                keys[i] = BitConverter.ToUInt16(keyData, keyOffset);
+                                keyOffset += 2;
+                                break;
+                            }
+                        case 3: // UInt32
+                            {
+                                keys[i] = BitConverter.ToUInt32(keyData, keyOffset);
+                                keyOffset += 4;
+                                break;
+                            }
+                        case 4: // Int32
+                            {
+                                keys[i] = BitConverter.ToInt32(keyData, keyOffset);
+                                keyOffset += 4;
+                                break;
+                            }
+                        case 5: // Hash128
+                            {
+                                var hashLength = keyData[keyOffset];
+                                keyOffset++;
+                                keys[i] = Encoding.ASCII.GetString(keyData, keyOffset, hashLength);
+                                keyOffset += hashLength;
+                                break;
+                            }
+                        case 6: // Type
+                            {
+                                var typeLength = keyData[keyOffset];
+                                keyOffset++;
+                                keys[i] = Encoding.ASCII.GetString(keyData, keyOffset, typeLength);
+                                keyOffset += typeLength;
+                                break;
+                            }
+                        case 7: // JsonObject - skip for now
+                            {
+                                var assemblyNameLength = keyData[keyOffset];
+                                keyOffset += 1 + assemblyNameLength;
+                                var classNameLength = keyData[keyOffset];
+                                keyOffset += 1 + classNameLength;
+                                var jsonLength = BitConverter.ToInt32(keyData, keyOffset);
+                                keyOffset += 4 + jsonLength;
+                                keys[i] = $"JsonObject_Skipped";
+                                break;
+                            }
+                        default:
+                            keys[i] = $"UnknownType{keyTypeByte}";
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    keys[i] = $"ParseError_{ex.Message}";
+                    break;
+                }
+            }
+
+            // Debug: 输出前10个key的内容和统计信息
+            int validStringCount = 0;
+            int unknownTypeCount = 0;
+            int int32Count = 0;
+            int guidCount = 0;
             
-            // 解码 BucketDataString
+            for (int i = 0; i < keys.Length; i++)
+            {
+                var keyStr = keys[i] as string;
+                if (keyStr != null)
+                {
+                    if (keyStr.StartsWith("UnknownType"))
+                        unknownTypeCount++;
+                    else
+                    {
+                        validStringCount++;
+                        if (IsGuid(keyStr))
+                            guidCount++;
+                    }
+                }
+                else if (keys[i] is int)
+                {
+                    int32Count++;
+                }
+            }
+            
+            Console.WriteLine("\n[Debug] Key解析统计:");
+            Console.WriteLine($"  总Key数: {keys.Length}");
+            Console.WriteLine($"  有效字符串: {validStringCount}");
+            Console.WriteLine($"  其中GUID格式: {guidCount}");
+            Console.WriteLine($"  Int32类型: {int32Count}");
+            Console.WriteLine($"  UnknownType: {unknownTypeCount}");
+            Console.WriteLine($"\n前10个Key示例:");
+            for (int i = 0; i < Math.Min(10, keys.Length); i++)
+            {
+                var key = keys[i];
+                var keyStr = key as string;
+                if (keyStr != null)
+                {
+                    var preview = keyStr.Length > 60 ? keyStr.Substring(0, 60) + "..." : keyStr;
+                    Console.WriteLine($"  [{i}] {preview} (长度:{keyStr.Length})");
+                }
+                else
+                {
+                    Console.WriteLine($"  [{i}] {key} (类型:{key?.GetType().Name ?? "null"})");
+                }
+            }
+            Console.WriteLine();
+
+            int foundCount = 0;
+
+            // 方法1: 解码 EntryDataString (base64 → binary → entries) - 获取所有详细条目
+            var entryData = Convert.FromBase64String(catalog.EntryDataString);
+            int entryCount = BitConverter.ToInt32(entryData, 0);
+            int entryOffset = 4;
+
+            Console.WriteLine($"Entry 数量: {entryCount}");
+            Console.WriteLine("正在解析 EntryData GUID 映射...");
+
+            const int kBytesPerInt32 = 4;
+            int keyRangeFail = 0, notStringFail = 0, internalIdFail = 0, notGuidFail = 0;
+
+            for (int i = 0; i < entryCount; i++)
+            {
+                // Read entry data (7 integers per entry)
+                var internalId = BitConverter.ToInt32(entryData, entryOffset);
+                entryOffset += kBytesPerInt32;
+
+                var providerIndex = BitConverter.ToInt32(entryData, entryOffset);
+                entryOffset += kBytesPerInt32;
+
+                var dependencyKeyIndex = BitConverter.ToInt32(entryData, entryOffset);
+                entryOffset += kBytesPerInt32;
+
+                var depHash = BitConverter.ToInt32(entryData, entryOffset);
+                entryOffset += kBytesPerInt32;
+
+                var dataIndex = BitConverter.ToInt32(entryData, entryOffset);
+                entryOffset += kBytesPerInt32;
+
+                var primaryKey = BitConverter.ToInt32(entryData, entryOffset);
+                entryOffset += kBytesPerInt32;
+
+                var resourceType = BitConverter.ToInt32(entryData, entryOffset);
+                entryOffset += kBytesPerInt32;
+
+                // Debug前5个entry
+                if (i < 5)
+                {
+                    var keyPreview = (primaryKey >= 0 && primaryKey < keys.Length) ? keys[primaryKey] : "OUT_OF_RANGE";
+                    Console.WriteLine($"  [Entry{i}] primaryKey={primaryKey}, internalId={internalId}, key={keyPreview}");
+                }
+
+                // Extract data
+                if (primaryKey >= 0 && primaryKey < keys.Length)
+                {
+                    var keyObj = keys[primaryKey];
+                    if (keyObj is string keyStr)
+                    {
+                        if (internalId >= 0 && internalId < catalog.InternalIds.Length)
+                        {
+                            // 尝试从keyStr中提取GUID
+                            // 1. 如果keyStr本身就是32字符GUID，直接使用
+                            // 2. 否则尝试提取其中的32字符十六进制串
+                            string guid = null;
+                            
+                            if (IsGuid(keyStr))
+                            {
+                                guid = keyStr.ToLower();
+                            }
+                            else
+                            {
+                                // 尝试提取：前32字符、后缀前32字符、或任意连续32字符十六进制
+                                if (keyStr.Length >= 32 && IsGuid(keyStr.Substring(0, 32)))
+                                {
+                                    guid = keyStr.Substring(0, 32).ToLower();
+                                }
+                                else
+                                {
+                                    // 使用正则表达式提取32位十六进制GUID
+                                    var match = System.Text.RegularExpressions.Regex.Match(keyStr, @"([0-9a-fA-F]{32})");
+                                    if (match.Success)
+                                    {
+                                        guid = match.Groups[1].Value.ToLower();
+                                    }
+                                }
+                            }
+                            
+                            if (guid != null)
+                            {
+                                if (!_guidToPath.ContainsKey(guid))
+                                {
+                                    _guidToPath[guid] = catalog.InternalIds[internalId];
+                                    foundCount++;
+                                }
+                            }
+                            else
+                            {
+                                notGuidFail++;
+                            }
+                        }
+                        else
+                        {
+                            internalIdFail++;
+                        }
+                    }
+                    else
+                    {
+                        notStringFail++;
+                    }
+                }
+                else
+                {
+                    keyRangeFail++;
+                }
+            }
+            
+            Console.WriteLine($"  失败统计: keyRange={keyRangeFail}, notString={notStringFail}, internalIdFail={internalIdFail}, notGuid={notGuidFail}");
+
+            Console.WriteLine($"  从 EntryData 找到: {foundCount} 个 GUID");
+
+            // 方法2: 解码 BucketDataString - 获取哈希桶中的 GUID (补充遗漏的)
             var bucketData = Convert.FromBase64String(catalog.BucketDataString);
             var bucketCount = BitConverter.ToInt32(bucketData, 0);
 
             Console.WriteLine($"Bucket 数量: {bucketCount}");
-            Console.WriteLine("正在解析 GUID 映射...");
+            Console.WriteLine("正在解析 BucketData GUID 映射（补充）...");
 
+            int bucketFoundCount = 0;
             int offset = 4;
-            int foundCount = 0;
 
             for (int i = 0; i < bucketCount; i++)
             {
                 var dataOffset = BitConverter.ToInt32(bucketData, offset);
                 offset += 4;
-                var entryCount = BitConverter.ToInt32(bucketData, offset);
+                var entryCountInBucket = BitConverter.ToInt32(bucketData, offset);
                 offset += 4;
 
                 // 读取 key
-                var keyType = keyData[dataOffset];
-                if (keyType == 0) // ASCII String (GUID)
+                if (dataOffset < keyData.Length)
                 {
-                    var keyValueOffset = dataOffset + 1;
-                    var strLen = BitConverter.ToInt32(keyData, keyValueOffset);
-                    keyValueOffset += 4;
-                    var strBytes = new byte[strLen];
-                    Array.Copy(keyData, keyValueOffset, strBytes, 0, strLen);
-                    var guid = Encoding.ASCII.GetString(strBytes);
-
-                    // 只处理看起来像 GUID 的字符串（32 个十六进制字符）
-                    if (IsGuid(guid) && entryCount > 0)
+                    var keyType = BitConverter.ToInt32(keyData, dataOffset);
+                    if (keyType == 0) // String key (GUID)
                     {
-                        // 读取第一个 entry 作为主要资源路径
-                        var entryIndex = BitConverter.ToInt32(bucketData, offset);
-                        if (entryIndex < catalog.InternalIds.Length)
+                        var keyValueOffset = dataOffset + 4;
+                        if (keyValueOffset + 4 <= keyData.Length)
                         {
-                            var internalId = catalog.InternalIds[entryIndex];
-                            _guidToPath[guid] = internalId;
-                            foundCount++;
+                            var strLen = BitConverter.ToInt32(keyData, keyValueOffset);
+                            keyValueOffset += 4;
+                            if (keyValueOffset + strLen <= keyData.Length)
+                            {
+                                var strBytes = new byte[strLen];
+                                Array.Copy(keyData, keyValueOffset, strBytes, 0, strLen);
+                                var guid = Encoding.UTF8.GetString(strBytes);
+
+                                // 只处理看起来像 GUID 的字符串（32 个十六进制字符）
+                                if (IsGuid(guid) && entryCountInBucket > 0)
+                                {
+                                    // 读取第一个 entry 作为主要资源路径
+                                    if (offset + 4 <= bucketData.Length)
+                                    {
+                                        var entryIndex = BitConverter.ToInt32(bucketData, offset);
+                                        if (entryIndex >= 0 && entryIndex < catalog.InternalIds.Length)
+                                        {
+                                            // 只添加 EntryData 中没有的
+                                            if (!_guidToPath.ContainsKey(guid))
+                                            {
+                                                _guidToPath[guid] = catalog.InternalIds[entryIndex];
+                                                bucketFoundCount++;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
 
-                offset += (entryCount * 4);
+                offset += (entryCountInBucket * 4);
             }
 
-            Console.WriteLine($"✅ 解析完成！找到 {foundCount} 个 GUID 映射");
-            Console.WriteLine();
+                Console.WriteLine($"  从 BucketData 补充: {bucketFoundCount} 个 GUID");
+                Console.WriteLine($"✅ 解析完成！总共找到 {foundCount + bucketFoundCount} 个 GUID 映射");
+                Console.WriteLine();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ 解析 Catalog 时发生错误:");
+                Console.WriteLine($"   类型: {ex.GetType().Name}");
+                Console.WriteLine($"   消息: {ex.Message}");
+                Console.WriteLine($"   堆栈: {ex.StackTrace}");
+                throw;
+            }
         }
+        */
 
         /// <summary>
-        /// 步骤 1.5: 加载格式转换映射（可选，用于处理 .psb → .png 等转换）
+        /// 步骤 3.5: 验证关卡文件 GUID 关联的正确性（在建立映射之后）
         /// </summary>
-        public void LoadFormatConversions(string exportedProjectPath)
+        public void ValidateLevelDataAssociations(string levelDataPath)
         {
-            string formatConversionFile = Path.Combine(exportedProjectPath, "format_conversions.json");
-            
-            if (File.Exists(formatConversionFile))
+            Console.WriteLine("=== 步骤 3.5: 验证关卡文件 GUID 关联 ===");
+            Console.WriteLine($"关卡数据路径: {levelDataPath}");
+            Console.WriteLine();
+
+            if (!Directory.Exists(levelDataPath))
             {
-                Console.WriteLine("=== 加载格式转换映射 ===");
-                Console.WriteLine($"文件: {formatConversionFile}");
-                
+                Console.WriteLine("⚠ 关卡数据目录不存在，跳过此步骤");
+                Console.WriteLine();
+                return;
+            }
+
+            var levelFiles = Directory.GetFiles(levelDataPath, "*.asset", SearchOption.AllDirectories);
+            Console.WriteLine($"找到 {levelFiles.Length} 个关卡文件");
+
+            int totalValidations = 0;
+            int successfulValidations = 0;
+            int failedValidations = 0;
+            int totalGroupIds = 0;
+            int foundGroupIds = 0;
+            
+            foreach (var levelFile in levelFiles)
+            {
                 try
                 {
-                    string json = File.ReadAllText(formatConversionFile);
-                    var conversions = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                    var content = File.ReadAllText(levelFile);
                     
-                    if (conversions != null)
+                    // 提取所有 Stages 中的 GroupId
+                    var stageMatches = Regex.Matches(content, @"Stages:\s*((?:\s*-\s*GroupId:\s*\S+\s*)+)", RegexOptions.Multiline);
+                    var guidMatches = Regex.Matches(content, @"m_AssetGUID:\s*([a-f0-9]{32})", RegexOptions.Multiline);
+                    
+                    // 提取 GroupId 列表
+                    List<string> groupIds = new List<string>();
+                    foreach (Match stageMatch in stageMatches)
                     {
-                        foreach (var kvp in conversions)
+                        var groupIdMatches = Regex.Matches(stageMatch.Groups[1].Value, @"GroupId:\s*(\S+)");
+                        foreach (Match gidMatch in groupIdMatches)
                         {
-                            _formatConversions[kvp.Key.Replace('\\', '/').ToLowerInvariant()] = kvp.Value.Replace('\\', '/');
+                            groupIds.Add(gidMatch.Groups[1].Value);
                         }
-                        Console.WriteLine($"✅ 加载了 {_formatConversions.Count} 个格式转换映射");
+                    }
+                    
+                    // 提取所有 GUID
+                    List<string> guids = new List<string>();
+                    foreach (Match guidMatch in guidMatches)
+                    {
+                        guids.Add(guidMatch.Groups[1].Value);
+                    }
+                    
+                    // 如果没有 GroupId 或 GUID，跳过验证
+                    if (groupIds.Count == 0 || guids.Count == 0)
+                    {
+                        continue;
+                    }
+                    
+                    // 验证：检查 GroupId 中的所有内容是否存在于 m_AssetGUID 关联的资源中
+                    totalValidations++;
+                    bool allGroupIdsFound = true;
+                    List<string> missingGroupIds = new List<string>();
+                    
+                    foreach (var groupId in groupIds)
+                    {
+                        totalGroupIds++;
+                        bool found = false;
+                        
+                        // 检查是否在文件名映射中找到匹配GroupId的资源
+                        if (_fileNameToNewGuid.ContainsKey(groupId.ToLower()))
+                        {
+                            found = true;
+                            foundGroupIds++;
+                        }
+                        
+                        if (!found)
+                        {
+                            allGroupIdsFound = false;
+                            missingGroupIds.Add(groupId);
+                        }
+                    }
+                    
+                    // 输出验证结果
+                    if (allGroupIdsFound)
+                    {
+                        successfulValidations++;
+                        // 只在详细模式下显示成功的验证
+                        // Console.WriteLine($"✅ {Path.GetFileName(levelFile)}: 验证通过 ({groupIds.Count} 个 GroupId)");
+                    }
+                    else
+                    {
+                        failedValidations++;
+                        // 只显示前5个失败的详细信息
+                        if (failedValidations <= 5)
+                        {
+                            Console.WriteLine($"❌ {Path.GetFileName(levelFile)}: 验证失败");
+                            Console.WriteLine($"   缺失的 GroupId: {string.Join(", ", missingGroupIds.Take(10))}");
+                            if (missingGroupIds.Count > 10)
+                            {
+                                Console.WriteLine($"   ... 还有 {missingGroupIds.Count - 10} 个");
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"⚠ 加载格式转换映射失败: {ex.Message}");
+                    Console.WriteLine($"⚠ 处理文件失败 {Path.GetFileName(levelFile)}: {ex.Message}");
                 }
-                Console.WriteLine();
             }
+            
+            Console.WriteLine();
+            Console.WriteLine($"=== 验证统计 ===");
+            Console.WriteLine($"  总验证数: {totalValidations}");
+            Console.WriteLine($"  验证通过: {successfulValidations}");
+            Console.WriteLine($"  验证失败: {failedValidations}");
+            Console.WriteLine($"  GroupId 总数: {totalGroupIds}");
+            Console.WriteLine($"  找到的 GroupId: {foundGroupIds}");
+            Console.WriteLine($"  匹配率: {(totalGroupIds > 0 ? (foundGroupIds * 100.0 / totalGroupIds).ToString("F1") : "0")}%");
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -173,7 +646,25 @@ namespace AssetRipper.Tools
                         // 标准化路径（使用 / 分隔符）
                         relativePath = relativePath.Replace('\\', '/');
                         
+                        // 建立完整路径到GUID的映射
                         _pathToNewGuid[relativePath] = newGuid;
+                        
+                        // 建立文件名（不含扩展名）到GUID的映射
+                        // 优先选择.prefab文件，因为leveldata中的引用通常指向prefab
+                        var fileName = Path.GetFileNameWithoutExtension(assetFile).ToLower();
+                        var extension = Path.GetExtension(assetFile).ToLower();
+                        
+                        if (!_fileNameToNewGuid.ContainsKey(fileName))
+                        {
+                            // 第一次遇到这个文件名，直接添加
+                            _fileNameToNewGuid[fileName] = newGuid;
+                        }
+                        else if (extension == ".prefab")
+                        {
+                            // 如果是prefab，覆盖之前的映射（prefab优先级最高）
+                            _fileNameToNewGuid[fileName] = newGuid;
+                        }
+                        
                         processedCount++;
                     }
                 }
@@ -184,13 +675,61 @@ namespace AssetRipper.Tools
             }
 
             Console.WriteLine($"✅ 扫描完成！处理了 {processedCount} 个资源");
+            Console.WriteLine($"   文件名映射: {_fileNameToNewGuid.Count} 个");
             Console.WriteLine();
         }
 
         /// <summary>
+        /// 步骤 3: 基于GroupId建立旧GUID到新GUID的映射
+        /// </summary>
+        public void BuildGuidMappingFromGroupIds()
+        {
+            Console.WriteLine("=== 步骤 3: 建立GUID映射关系 ===");
+            Console.WriteLine($"需要映射的旧GUID数量: {_oldGuidToGroupId.Count}");
+            Console.WriteLine();
+
+            int matchedCount = 0;
+            int notFoundCount = 0;
+
+            foreach (var pair in _oldGuidToGroupId)
+            {
+                string oldGuid = pair.Key;
+                string groupId = pair.Value.ToLower();
+
+                // 在文件名映射中查找匹配GroupId的资源
+                if (_fileNameToNewGuid.TryGetValue(groupId, out string newGuid))
+                {
+                    _oldGuidToNewGuid[oldGuid] = newGuid;
+                    matchedCount++;
+                }
+                else
+                {
+                    notFoundCount++;
+                    if (notFoundCount <= 10) // 只显示前10个未匹配的
+                    {
+                        Console.WriteLine($"  ⚠ 未找到匹配: 旧GUID={oldGuid}, GroupId={groupId}");
+                    }
+                }
+            }
+
+            if (notFoundCount > 10)
+            {
+                Console.WriteLine($"  ... 还有 {notFoundCount - 10} 个未匹配的GroupId");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine($"✅ 映射完成！");
+            Console.WriteLine($"   成功匹配: {matchedCount} 个");
+            Console.WriteLine($"   未找到匹配: {notFoundCount} 个");
+            Console.WriteLine($"   匹配率: {(matchedCount * 100.0 / _oldGuidToGroupId.Count):F1}%");
+            Console.WriteLine();
+        }
+
+        /* 旧的BuildGuidMapping方法已废弃
+        /// <summary>
         /// 步骤 3: 建立旧 GUID → 新 GUID 的映射
         /// </summary>
-        public void BuildGuidMapping()
+        public void BuildGuidMapping_OLD()
         {
             Console.WriteLine("=== 步骤 3: 建立 GUID 映射关系 ===");
             Console.WriteLine($"总共需要处理 {_guidToPath.Count} 个 GUID...");
@@ -205,26 +744,32 @@ namespace AssetRipper.Tools
             int totalCount = _guidToPath.Count;
             int lastProgress = 0;
 
-            foreach (var kvp in _guidToPath)
+            Console.WriteLine($"总共需要处理 {totalCount} 个 GUID...");
+            Console.WriteLine();
+
+            foreach (var oldGuid in _guidToPath.Keys)
             {
                 try
                 {
-                    var oldGuid = kvp.Key;
-                    var internalId = kvp.Value;
-
-                    // 尝试匹配资源路径
-                    // internalId 格式可能是：{hash}[{path}]
-                    var pathMatch = Regex.Match(internalId, @"\[(.+?)\]");
                     string resourcePath = null;
+                    string internalId = null;
+                    
+                    // 使用 catalog 中的路径
+                    if (_guidToPath.TryGetValue(oldGuid, out internalId))
+                    {
+                        // 尝试匹配资源路径
+                        // internalId 格式可能是：{hash}[{path}]
+                        var pathMatch = Regex.Match(internalId, @"\[(.+?)\]");
 
-                    if (pathMatch.Success)
-                    {
-                        resourcePath = pathMatch.Groups[1].Value;
-                    }
-                    else
-                    {
-                        // 可能是直接的路径
-                        resourcePath = internalId;
+                        if (pathMatch.Success)
+                        {
+                            resourcePath = pathMatch.Groups[1].Value;
+                        }
+                        else
+                        {
+                            // 可能是直接的路径
+                            resourcePath = internalId;
+                        }
                     }
 
                     // 尝试在导出的项目中找到对应的资源
@@ -241,7 +786,10 @@ namespace AssetRipper.Tools
                         if (unmatchedCount <= 10) // 只显示前 10 个未匹配的
                         {
                             Console.WriteLine($"⚠ 未找到匹配: {oldGuid} → {resourcePath}");
-                            Console.WriteLine($"  原始 InternalId: {internalId}");
+                            if (internalId != null)
+                            {
+                                Console.WriteLine($"  原始 InternalId: {internalId}");
+                            }
                         }
                     }
                 }
@@ -266,6 +814,7 @@ namespace AssetRipper.Tools
             Console.WriteLine($"  - 未匹配: {unmatchedCount} 个");
             Console.WriteLine();
         }
+        */
 
         /// <summary>
         /// 步骤 4: 转换关卡配置文件中的 GUID
@@ -367,7 +916,12 @@ namespace AssetRipper.Tools
             {
                 var oldGuid = kvp.Key;
                 var newGuid = kvp.Value;
-                var path = _guidToPath.TryGetValue(oldGuid, out var p) ? p : "Unknown";
+                
+                // 尝试找到对应的GroupId和路径
+                var groupId = _oldGuidToGroupId.TryGetValue(oldGuid, out var gid) ? gid : "Unknown";
+                
+                // 尝试从路径映射中找到对应的路径
+                var path = _pathToNewGuid.FirstOrDefault(p => p.Value == newGuid).Key ?? $"GroupId:{groupId}";
                 
                 sb.AppendLine($"{oldGuid}\t→\t{newGuid}\t→\t{path}");
             }
@@ -427,15 +981,15 @@ namespace AssetRipper.Tools
                 return _pathToNewGuid[exactPath];
             }
 
-            // 2. 使用格式转换映射（处理 .psb → .png 等转换）
-            if (_formatConversions.TryGetValue(resourcePath, out string convertedPath))
-            {
-                var convertedLower = convertedPath.ToLowerInvariant();
-                if (_pathLookupCache.TryGetValue(convertedLower, out string convertedExactPath))
-                {
-                    return _pathToNewGuid[convertedExactPath];
-                }
-            }
+            // 2. 格式转换映射已废弃（不再使用catalog）
+            // if (_formatConversions.TryGetValue(resourcePath, out string convertedPath))
+            // {
+            //     var convertedLower = convertedPath.ToLowerInvariant();
+            //     if (_pathLookupCache.TryGetValue(convertedLower, out string convertedExactPath))
+            //     {
+            //         return _pathToNewGuid[convertedExactPath];
+            //     }
+            // }
 
             // 3. 如果没有格式转换映射，尝试手动替换 .psb 为 .png（兼容旧版本）
             if (resourcePath.EndsWith(".psb", StringComparison.OrdinalIgnoreCase))
