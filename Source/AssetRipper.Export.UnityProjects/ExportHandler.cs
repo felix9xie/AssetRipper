@@ -150,6 +150,10 @@ public class ExportHandler
 		yield return new PathIdMapExporter();
 		yield return new FormatConversionMapExporter(); // Export format conversion map for Addressable GUID mapping
 		yield return new AddressableGuidMappingPostExporter(); // Export Addressable GUID mapping records
+		yield return new AssetReferenceGuidPostExporter(); // Fix AssetReference m_AssetGUID: catalog format → .meta format
+		// LeveldataGuidPostExporter disabled: Use Unity Editor tool instead (Assets/Editor/AddressableReferenceFixer.cs)
+		// This provides more flexibility and allows manual verification
+		//yield return new LeveldataGuidPostExporter();
 	}
 
 	public GameData LoadAndProcess(IReadOnlyList<string> paths, FileSystem fileSystem)

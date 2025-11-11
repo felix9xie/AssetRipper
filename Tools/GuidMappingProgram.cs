@@ -24,10 +24,10 @@ namespace AssetRipper.Tools
                 // var outputPath = @"D:\Work\Demo\LevelDataUnpack\Assets\leveldata_converted";
                 // var mappingTablePath = @"D:\Work\Demo\LevelDataUnpack\guid_mapping_table.txt";
 
-                var exportedProjectPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject";
-                var levelDataPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject\Assets\Resources\leveldata";
-                var outputPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject\Assets\Resources\leveldata_converted";
-                var mappingTablePath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject\guid_mapping_table.txt";
+                var exportedProjectPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_030331\ExportedProject";
+                var levelDataPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_030331\ExportedProject\Assets\Resources\leveldata";
+                var outputPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_030331\ExportedProject\Assets\Resources\leveldata_converted";
+                var mappingTablePath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_030331\ExportedProject\guid_mapping_table.txt";
 
                 // 检查路径
                 if (!File.Exists(catalogPath))

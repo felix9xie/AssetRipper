@@ -11,13 +11,13 @@ public class AssetExportCollection<T> : ExportCollection where T : IUnityObjectB
 		AssetExporter = assetExporter ?? throw new ArgumentNullException(nameof(assetExporter));
 		Asset = asset ?? throw new ArgumentNullException(nameof(asset));
 		
-		// Priority 1: Try to find GUID from BundleGuidExtractor (extracted from leveldata)
-		// This gives us the actual m_AssetGUID from AssetReference fields
-		GUID = Processing.BundleGuidExtractor.TryGetAssetGuidFromLevelData(asset, out UnityGuid leveldataGuid)
-			? leveldataGuid
-			// Priority 2: Try Addressable catalog
-			: AddressableGuidResolver.TryFindOriginalGuid(asset, out UnityGuid catalogGuid)
-				? catalogGuid
+		// Priority 1: Try to find GUID from Addressable catalog (universal approach)
+		// This uses the catalog.json from the game to get the actual GUID
+		GUID = Processing.BundleGuidExtractor.TryGetAssetGuidFromCatalog(asset, out UnityGuid catalogGuid)
+			? catalogGuid
+			// Priority 2: Try legacy AddressableGuidResolver (fallback)
+			: AddressableGuidResolver.TryFindOriginalGuid(asset, out UnityGuid legacyGuid)
+				? legacyGuid
 				// Priority 3: Generate deterministic GUID
 				: GenerateDeterministicGuid(asset);
 			

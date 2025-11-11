@@ -9,45 +9,41 @@ namespace AssetRipper.Tools
 	/// </summary>
 	public class GuidEndiannessConverter
 	{
-		/// <summary>
-		/// 将32位十六进制 GUID 从大端序转换为小端序
-		/// 例如：662b44a898afe7840a044dcf6bfc8120 → a8442b6684e7af98cf4d040a2081fc6b
-		/// </summary>
-		private static string ConvertGuidToLittleEndian(string bigEndianGuid)
+	/// <summary>
+	/// 将32位十六进制 GUID 转换为 Unity .meta 文件格式
+	/// 步骤：字节序反转 + nibble swap
+	/// 例如：662b44a898afe7840a044dcf6bfc8120 → 8a44b266487efa89fcd440a00218cfb6
+	/// </summary>
+	private static string ConvertGuidToLittleEndian(string bigEndianGuid)
+	{
+		if (string.IsNullOrEmpty(bigEndianGuid) || bigEndianGuid.Length != 32)
 		{
-			if (string.IsNullOrEmpty(bigEndianGuid) || bigEndianGuid.Length != 32)
-			{
-				return bigEndianGuid;
-			}
-
-			// 每8个字符（4字节）作为一组，反转字节序
-			string part0 = bigEndianGuid.Substring(0, 8);   // 662b44a8
-			string part1 = bigEndianGuid.Substring(8, 8);   // 98afe784
-			string part2 = bigEndianGuid.Substring(16, 8);  // 0a044dcf
-			string part3 = bigEndianGuid.Substring(24, 8);  // 6bfc8120
-
-			// 反转每个4字节组的字节序
-			string result = ReverseBytes(part0) +
-			                ReverseBytes(part1) +
-			                ReverseBytes(part2) +
-			                ReverseBytes(part3);
-
-			return result;
+			return bigEndianGuid;
 		}
 
-		/// <summary>
-		/// 反转字节序：每2个字符（1字节）为单位反转
-		/// 例如：662b44a8 → a8442b66
-		/// </summary>
-		private static string ReverseBytes(string hex)
+		// 步骤1：字节序反转（每4字节反转）
+		string ReverseBytes(string hex)
 		{
 			if (hex.Length != 8) return hex;
-
-			return hex.Substring(6, 2) + // a8
-			       hex.Substring(4, 2) + // 44
-			       hex.Substring(2, 2) + // 2b
-			       hex.Substring(0, 2);  // 66
+			return hex.Substring(6, 2) + hex.Substring(4, 2) + hex.Substring(2, 2) + hex.Substring(0, 2);
 		}
+
+		string reversed = ReverseBytes(bigEndianGuid.Substring(0, 8)) +
+		                 ReverseBytes(bigEndianGuid.Substring(8, 8)) +
+		                 ReverseBytes(bigEndianGuid.Substring(16, 8)) +
+		                 ReverseBytes(bigEndianGuid.Substring(24, 8));
+
+		// 步骤2：nibble swap（每两个字符交换）
+		char[] chars = reversed.ToCharArray();
+		for (int i = 0; i < 32; i += 2)
+		{
+			char temp = chars[i];
+			chars[i] = chars[i + 1];
+			chars[i + 1] = temp;
+		}
+
+		return new string(chars);
+	}
 
 		/// <summary>
 		/// 转换 leveldata 目录中的所有 .asset 文件的 GUID 格式
@@ -144,12 +140,12 @@ namespace AssetRipper.Tools
 			Console.WriteLine("=== 测试 GUID 字节序转换 ===");
 			Console.WriteLine();
 
-			var testCases = new[]
-			{
-				("662b44a898afe7840a044dcf6bfc8120", "a8442b6684e7af98cf4d040a2081fc6b", "fisherman_0"),
-				("7e92e440b4b49fe4b92999e25fd199bc", "40e4927ee49fb4b4e29929b9bc99d15f", "tent_0"),
-				("7ad548b4ffbdcd9429eb5d362686ab66", "b448d57a94cdbdff365deb2966ab8626", "boat_0")
-			};
+		var testCases = new[]
+		{
+			("662b44a898afe7840a044dcf6bfc8120", "8a44b266487efa89fcd440a00218cfb6", "fisherman_0"),
+			("7e92e440b4b49fe4b92999e25fd199bc", "044e29e74ef94b4b2e99929bcb991df5", "tent_0"),
+			("7ad548b4ffbdcd9429eb5d362686ab66", "4b845da749dcdbff63d5be9266ba6862", "boat_0")
+		};
 
 			foreach (var (bigEndian, expectedLittleEndian, name) in testCases)
 			{

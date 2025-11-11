@@ -11,12 +11,11 @@ namespace AssetRipper.Tools
 			// 首先运行测试
 			GuidEndiannessConverter.Test();
 
-			Console.WriteLine("按任意键开始转换 leveldata 文件...");
-			Console.ReadKey();
+			Console.WriteLine("开始转换 leveldata 文件...");
 			Console.WriteLine();
 
 			// 配置路径（使用最新的导出目录）
-			string levelDataPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_000418\ExportedProject\Assets\Resources\leveldata";
+			string levelDataPath = @"D:\Work\UnPacker\Triple Match City\AssetRipper_export_20251110_030331\ExportedProject\Assets\Resources\leveldata";
 
 			if (!System.IO.Directory.Exists(levelDataPath))
 			{
@@ -24,8 +23,6 @@ namespace AssetRipper.Tools
 				Console.WriteLine($"   {levelDataPath}");
 				Console.WriteLine();
 				Console.WriteLine("请检查路径是否正确！");
-				Console.WriteLine("按任意键退出...");
-				Console.ReadKey();
 				return;
 			}
 
@@ -33,8 +30,7 @@ namespace AssetRipper.Tools
 			var converter = new GuidEndiannessConverter();
 			converter.ConvertLevelDataDirectory(levelDataPath);
 
-			Console.WriteLine("按任意键退出...");
-			Console.ReadKey();
+			Console.WriteLine("转换完成！");
 		}
 	}
 }
