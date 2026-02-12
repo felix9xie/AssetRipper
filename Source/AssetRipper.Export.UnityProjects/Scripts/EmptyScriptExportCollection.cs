@@ -1,4 +1,4 @@
-﻿using AssetRipper.Export.UnityProjects.Scripts.AssemblyDefinitions;
+using AssetRipper.Export.UnityProjects.Scripts.AssemblyDefinitions;
 using AssetRipper.Import.Logging;
 using AssetRipper.SourceGenerated.Classes.ClassID_115;
 using System.Diagnostics;
@@ -40,7 +40,12 @@ public sealed class EmptyScriptExportCollection : ScriptExportCollectionBase
 			GetExportSubPath(info, out string subFolderPath, out string fileName);
 			string folderPath = fileSystem.Path.Join(assetsDirectoryPath, subFolderPath);
 			string filePath = fileSystem.Path.Join(folderPath, fileName);
-			fileSystem.Directory.Create(folderPath);
+			// Create the exact parent directory of the file (ensures path normalization matches WriteAllText)
+			string? directoryToCreate = fileSystem.Path.GetDirectoryName(filePath);
+			if (!string.IsNullOrEmpty(directoryToCreate))
+			{
+				fileSystem.Directory.Create(directoryToCreate);
+			}
 			fileSystem.File.WriteAllText(filePath, EmptyScript.GetContent(info));
 			string assemblyName = info.Assembly;
 			if (!assemblyDefinitionDetailsDictionary.ContainsKey(assemblyName))

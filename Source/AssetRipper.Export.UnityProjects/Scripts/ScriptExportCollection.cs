@@ -91,7 +91,12 @@ public sealed class ScriptExportCollection : ScriptExportCollectionBase
 			string filePath = fileSystem.Path.Join(folderPath, fileName);
 			if (!fileSystem.File.Exists(filePath))
 			{
-				fileSystem.Directory.Create(folderPath);
+				// Create the exact parent directory of the file (ensures path normalization matches WriteAllText)
+				string? directoryToCreate = fileSystem.Path.GetDirectoryName(filePath);
+				if (!string.IsNullOrEmpty(directoryToCreate))
+				{
+					fileSystem.Directory.Create(directoryToCreate);
+				}
 				fileSystem.File.WriteAllText(filePath, EmptyScript.GetContent(asset));
 				string assemblyName = asset.GetAssemblyNameFixed();
 				if (!assemblyDefinitionDetailsDictionary.ContainsKey(assemblyName))

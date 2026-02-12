@@ -44,15 +44,24 @@ public class TextureAssetExporter : BinaryAssetExporter
 			return false;
 		}
 
-		if (TextureConverter.TryConvertToBitmap(texture, out DirectBitmap bitmap))
+		try
 		{
-			using Stream stream = fileSystem.File.Create(path);
-			bitmap.Save(stream, ImageExportFormat);
-			return true;
+			if (TextureConverter.TryConvertToBitmap(texture, out DirectBitmap bitmap))
+			{
+				using Stream stream = fileSystem.File.Create(path);
+				bitmap.Save(stream, ImageExportFormat);
+				return true;
+			}
+			else
+			{
+				Logger.Log(LogType.Warning, LogCategory.Export, $"Unable to convert '{texture.Name}' to bitmap");
+				return false;
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			Logger.Log(LogType.Warning, LogCategory.Export, $"Unable to convert '{texture.Name}' to bitmap");
+			Logger.Log(LogType.Error, LogCategory.Export, 
+				$"Exception while exporting texture '{texture.Name}' ({texture.Width_C28}x{texture.Height_C28}, {texture.Format_C28E}): {ex.Message}");
 			return false;
 		}
 	}

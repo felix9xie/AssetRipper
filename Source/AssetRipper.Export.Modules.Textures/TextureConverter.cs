@@ -155,6 +155,20 @@ public static class TextureConverter
 			return false;
 		}
 
+		// 检测明显损坏的纹理数据
+		// 任何纹理如果小于 64 字节都可能是损坏的（即使是 1x1 的纹理通常也有更多数据）
+		// 或者如果数据大小远小于预期尺寸（使用非常保守的估计：1 bit per pixel）
+		int conservativeMinSize = int.Max(64, texture.Width_C28 * texture.Height_C28 / 8);
+		
+		if (buffer.Length < conservativeMinSize && buffer.Length <= 64)
+		{
+			Logger.Log(LogType.Warning, LogCategory.Export, 
+				$"Texture '{texture.Name}' has suspiciously small data size ({buffer.Length} bytes) for dimensions {texture.Width_C28}x{texture.Height_C28}. " +
+				$"Format: {texture.Format_C28E}. Skipping export to prevent decoder errors.");
+			bitmap = DirectBitmap.Empty;
+			return false;
+		}
+
 		if (!TryConvertToBitmap(
 			texture.Format_C28E,
 			texture.Width_C28,
@@ -296,10 +310,35 @@ public static class TextureConverter
 		int inputOffset = 0;
 		for (int i = 0; i < depth; i++)
 		{
-			ReadOnlySpan<byte> inputSpan = uncompressedSpan.Slice(inputOffset, int.Max(uncompressedSpan.Length - inputOffset, bytesPerLayer));
+			// 计算剩余数据大小
+			int remainingBytes = uncompressedSpan.Length - inputOffset;
+			if (remainingBytes <= 0)
+			{
+				Logger.Log(LogType.Error, LogCategory.Export, $"Not enough image data for layer {i}. Width: {width}, Height: {height}, Depth: {depth}, Format: {textureFormat}.");
+				bitmap = DirectBitmap.Empty;
+				return false;
+			}
+			
+			// 使用 Min 而不是 Max 来避免读取超出范围
+			int sliceSize = bytesPerLayer > 0 ? int.Min(remainingBytes, bytesPerLayer) : remainingBytes;
+			ReadOnlySpan<byte> inputSpan = uncompressedSpan.Slice(inputOffset, sliceSize);
 			Span<byte> outputSpan = bitmap.Bits.Slice(i * outputSize, outputSize);
 
-			int bytesRead = DecodeTexture<TColor, TChannelValue>(textureFormat, width, height, inputSpan, outputSpan);
+			int bytesRead;
+			try
+			{
+				bytesRead = DecodeTexture<TColor, TChannelValue>(textureFormat, width, height, inputSpan, outputSpan);
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(LogType.Error, LogCategory.Export, 
+					$"Failed to decode texture layer {i}. Width: {width}, Height: {height}, Depth: {depth}, " +
+					$"Format: {textureFormat}, Input size: {inputSpan.Length}, Output size: {outputSpan.Length}. " +
+					$"Error: {ex.Message}");
+				bitmap = DirectBitmap.Empty;
+				return false;
+			}
+			
 			if (bytesRead < 0)
 			{
 				bitmap = DirectBitmap.Empty;
